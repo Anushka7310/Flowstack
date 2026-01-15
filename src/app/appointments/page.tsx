@@ -4,9 +4,27 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+interface Appointment {
+  _id: string
+  startTime: string
+  endTime: string
+  status: string
+  reason: string
+  providerId?: {
+    firstName: string
+    lastName: string
+    specialty: string
+  }
+  patientSnapshot?: {
+    firstName: string
+    lastName: string
+    phone: string
+  }
+}
+
 export default function AppointmentsPage() {
   const router = useRouter()
-  const [appointments, setAppointments] = useState<any[]>([])
+  const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -22,21 +40,34 @@ export default function AppointmentsPage() {
 
   const fetchAppointments = async (token: string) => {
     try {
+      console.log('Fetching appointments...')
       const response = await fetch('/api/appointments', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       })
 
+      console.log('Response status:', response.status)
+
       if (!response.ok) {
-        throw new Error('Failed to fetch appointments')
+        const errorData = await response.json()
+        console.error('Error response:', errorData)
+        throw new Error(errorData.error || 'Failed to fetch appointments')
       }
 
       const data = await response.json()
-      setAppointments(data.data.appointments || [])
+      console.log('Appointments data:', data)
+
+      if (data.success && data.data) {
+        setAppointments(data.data.appointments || [])
+      } else {
+        setAppointments([])
+      }
     } catch (err) {
-      setError('Failed to load appointments')
-      console.error(err)
+      console.error('Fetch error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load appointments')
     } finally {
       setLoading(false)
     }
@@ -120,7 +151,7 @@ export default function AppointmentsPage() {
             </div>
           ) : (
             <div className="divide-y">
-              {appointments.map((appointment: any) => (
+              {appointments.map((appointment) => (
                 <div key={appointment._id} className="p-6 hover:bg-gray-50">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -169,17 +200,12 @@ export default function AppointmentsPage() {
                         <p>
                           <strong>Reason:</strong> {appointment.reason}
                         </p>
-                        {appointment.notes && (
-                          <p>
-                            <strong>Notes:</strong> {appointment.notes}
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Link
                         href={`/appointments/${appointment._id}`}
-                        className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700"
+                        className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
                       >
                         View Details
                       </Link>

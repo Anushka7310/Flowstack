@@ -8,14 +8,17 @@ export class AppointmentRepository {
     return appointment.save()
   }
 
-  async findById(id: string): Promise<IAppointment | null> {
+  async findById(id: string): Promise<any> {
     return Appointment.findOne({
       _id: id,
       deletedAt: null,
-    }).lean()
+    })
+      .populate('patientId', 'firstName lastName email phone')
+      .populate('providerId', 'firstName lastName specialty')
+      .lean()
   }
 
-  async findByIdWithReferences(id: string): Promise<IAppointment | null> {
+  async findByIdWithReferences(id: string): Promise<any> {
     return Appointment.findOne({
       _id: id,
       deletedAt: null,
@@ -28,7 +31,7 @@ export class AppointmentRepository {
   async findByPatient(
     patientId: string,
     options: { skip: number; limit: number }
-  ): Promise<IAppointment[]> {
+  ): Promise<any[]> {
     return Appointment.find({
       patientId: new Types.ObjectId(patientId),
       deletedAt: null,
@@ -44,13 +47,14 @@ export class AppointmentRepository {
     providerId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<IAppointment[]> {
+  ): Promise<any[]> {
     return Appointment.find({
       providerId: new Types.ObjectId(providerId),
       startTime: { $gte: startDate, $lte: endDate },
       deletedAt: null,
     })
       .sort({ startTime: 1 })
+      .populate('patientId', 'firstName lastName email phone')
       .lean()
   }
 
@@ -92,12 +96,15 @@ export class AppointmentRepository {
     })
   }
 
-  async update(id: string, data: Partial<IAppointment>): Promise<IAppointment | null> {
+  async update(id: string, data: Partial<IAppointment>): Promise<any> {
     return Appointment.findOneAndUpdate(
       { _id: id, deletedAt: null },
       { $set: data },
       { new: true }
-    ).lean()
+    )
+      .populate('patientId', 'firstName lastName email phone')
+      .populate('providerId', 'firstName lastName specialty')
+      .lean()
   }
 
   async softDelete(id: string): Promise<boolean> {

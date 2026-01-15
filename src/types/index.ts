@@ -74,6 +74,9 @@ export interface IAppointment {
   status: AppointmentStatus
   reason: string
   notes?: string
+  prescription?: string
+  rating?: number
+  patientFeedback?: string
   // Denormalized patient data for historical accuracy
   patientSnapshot: {
     firstName: string

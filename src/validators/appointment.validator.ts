@@ -17,6 +17,9 @@ export const updateAppointmentSchema = z.object({
   startTime: z.string().optional(),
   status: z.nativeEnum(AppointmentStatus).optional(),
   notes: z.string().max(1000).optional(),
+  prescription: z.string().max(2000).optional(),
+  rating: z.number().min(1).max(5).optional(),
+  patientFeedback: z.string().max(1000).optional(),
 })
 
 export const cancelAppointmentSchema = z.object({

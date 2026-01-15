@@ -29,6 +29,7 @@ export async function GET(
 
     return NextResponse.json(response, { status: 200 })
   } catch (error: any) {
+    console.error('GET /api/appointments/[id] error:', error)
     const { message, statusCode } = handleError(error)
 
     const response: ApiResponse = {
@@ -67,6 +68,7 @@ export async function PATCH(
 
     return NextResponse.json(response, { status: 200 })
   } catch (error: any) {
+    console.error('PATCH /api/appointments/[id] error:', error)
     const { message, statusCode } = handleError(error)
 
     const response: ApiResponse = {
@@ -97,6 +99,7 @@ export async function DELETE(
 
     return NextResponse.json(response, { status: 200 })
   } catch (error: any) {
+    console.error('DELETE /api/appointments/[id] error:', error)
     const { message, statusCode } = handleError(error)
 
     const response: ApiResponse = {

@@ -40,6 +40,19 @@ const appointmentSchema = new Schema<IAppointment>(
       type: String,
       trim: true,
     },
+    prescription: {
+      type: String,
+      trim: true,
+    },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+    },
+    patientFeedback: {
+      type: String,
+      trim: true,
+    },
     // Denormalized patient data for historical accuracy
     patientSnapshot: {
       firstName: {

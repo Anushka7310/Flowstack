@@ -25,7 +25,7 @@ export class AppointmentService {
   async createAppointment(
     patientId: string,
     input: CreateAppointmentInput
-  ): Promise<IAppointment> {
+  ): Promise<any> {
     // Validate provider exists and is active
     const provider = await this.providerRepo.findById(input.providerId)
     if (!provider || !provider.isActive) {
@@ -97,24 +97,21 @@ export class AppointmentService {
     return appointment
   }
 
-  async getAppointmentById(id: string, userId: string, userRole: string): Promise<IAppointment> {
+  async getAppointmentById(id: string, userId: string, userRole: string): Promise<any> {
     const appointment = await this.appointmentRepo.findByIdWithReferences(id)
     if (!appointment) {
       throw new NotFoundError('Appointment not found')
     }
 
-    // Authorization check
-    if (
-      userRole === 'patient' &&
-      appointment.patientId.toString() !== userId
-    ) {
+    // Authorization check - handle both ObjectId and string comparisons
+    const patientIdStr = appointment.patientId?._id?.toString() || appointment.patientId?.toString()
+    const providerIdStr = appointment.providerId?._id?.toString() || appointment.providerId?.toString()
+
+    if (userRole === 'patient' && patientIdStr !== userId) {
       throw new ForbiddenError('Access denied')
     }
 
-    if (
-      userRole === 'provider' &&
-      appointment.providerId.toString() !== userId
-    ) {
+    if (userRole === 'provider' && providerIdStr !== userId) {
       throw new ForbiddenError('Access denied')
     }
 
@@ -125,7 +122,7 @@ export class AppointmentService {
     patientId: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<{ appointments: IAppointment[]; total: number }> {
+  ): Promise<{ appointments: any[]; total: number }> {
     const skip = (page - 1) * limit
     const appointments = await this.appointmentRepo.findByPatient(patientId, {
       skip,
@@ -140,7 +137,7 @@ export class AppointmentService {
     providerId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<IAppointment[]> {
+  ): Promise<any[]> {
     return this.appointmentRepo.findByProvider(providerId, startDate, endDate)
   }
 
@@ -149,24 +146,21 @@ export class AppointmentService {
     userId: string,
     userRole: string,
     input: UpdateAppointmentInput
-  ): Promise<IAppointment> {
+  ): Promise<any> {
     const appointment = await this.appointmentRepo.findById(id)
     if (!appointment) {
       throw new NotFoundError('Appointment not found')
     }
 
-    // Authorization check
-    if (
-      userRole === 'patient' &&
-      appointment.patientId.toString() !== userId
-    ) {
+    // Authorization check - handle both ObjectId and string comparisons
+    const patientIdStr = appointment.patientId?._id?.toString() || appointment.patientId?.toString()
+    const providerIdStr = appointment.providerId?._id?.toString() || appointment.providerId?.toString()
+
+    if (userRole === 'patient' && patientIdStr !== userId) {
       throw new ForbiddenError('Access denied')
     }
 
-    if (
-      userRole === 'provider' &&
-      appointment.providerId.toString() !== userId
-    ) {
+    if (userRole === 'provider' && providerIdStr !== userId) {
       throw new ForbiddenError('Access denied')
     }
 
@@ -193,11 +187,10 @@ export class AppointmentService {
       throw new NotFoundError('Appointment not found')
     }
 
-    // Authorization check
-    if (
-      userRole === 'patient' &&
-      appointment.patientId.toString() !== userId
-    ) {
+    // Authorization check - handle both ObjectId and string comparisons
+    const patientIdStr = appointment.patientId?._id?.toString() || appointment.patientId?.toString()
+
+    if (userRole === 'patient' && patientIdStr !== userId) {
       throw new ForbiddenError('Access denied')
     }
 

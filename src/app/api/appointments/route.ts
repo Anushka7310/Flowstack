@@ -8,10 +8,34 @@ import { ApiResponse, UserRole } from '@/types'
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB()
+    // Connect to database
+    try {
+      await connectDB()
+    } catch (dbError) {
+      console.error('Database connection error:', dbError)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Database connection failed. Please check your MONGODB_URI environment variable.',
+        },
+        { status: 500 }
+      )
+    }
 
     // Authenticate user
-    const user = await authenticate(request)
+    let user
+    try {
+      user = await authenticate(request)
+    } catch (authError) {
+      console.error('Authentication error:', authError)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication failed. Please login again.',
+        },
+        { status: 401 }
+      )
+    }
 
     // Only patients can create appointments
     if (user.role !== UserRole.PATIENT) {
@@ -22,7 +46,21 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const validatedData = createAppointmentSchema.parse(body)
+    
+    // Validate input
+    let validatedData
+    try {
+      validatedData = createAppointmentSchema.parse(body)
+    } catch (validationError: any) {
+      console.error('Validation error:', validationError)
+      return NextResponse.json(
+        {
+          success: false,
+          error: validationError.errors?.[0]?.message || 'Invalid input data',
+        },
+        { status: 400 }
+      )
+    }
 
     const appointmentService = new AppointmentService()
     const appointment = await appointmentService.createAppointment(
@@ -38,6 +76,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 })
   } catch (error: any) {
+    console.error('Appointment creation error:', error)
     const { message, statusCode } = handleError(error)
 
     const response: ApiResponse = {
@@ -96,6 +135,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 })
   } catch (error: any) {
+    console.error('GET /api/appointments error:', error)
     const { message, statusCode } = handleError(error)
 
     const response: ApiResponse = {
