@@ -3,6 +3,26 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import {
+  Container,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  CircularProgress,
+  Stack,
+  TextField,
+  MenuItem,
+  Alert,
+  Grid,
+  InputAdornment,
+  Stepper,
+  Step,
+  StepLabel,
+} from '@mui/material'
+import { ArrowLeft, Calendar, Clock, User, FileText } from 'lucide-react'
+import { Header } from '@/components/Header'
 
 interface Provider {
   _id: string
@@ -13,23 +33,23 @@ interface Provider {
 
 export default function BookAppointmentPage() {
   const router = useRouter()
+  const [step, setStep] = useState(0)
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-
+  const [mounted, setMounted] = useState(false)
   const [formData, setFormData] = useState({
     providerId: '',
     startTime: '',
-    duration: 30,
+    duration: '30',
     reason: '',
   })
 
   useEffect(() => {
+    setMounted(true)
     const token = localStorage.getItem('token')
-    const role = localStorage.getItem('role')
-
-    if (!token || role !== 'patient') {
+    if (!token) {
       router.push('/auth/login')
       return
     }
@@ -40,29 +60,25 @@ export default function BookAppointmentPage() {
   const fetchProviders = async (token: string) => {
     try {
       const response = await fetch('/api/providers', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch providers: ${response.status}`)
+        throw new Error('Failed to fetch providers')
       }
 
       const data = await response.json()
-      console.log('Providers data:', data)
-      
-      if (data.success && data.data) {
-        setProviders(data.data)
-      } else {
-        setError('No providers available. Please register a provider first.')
-      }
+      setProviders(data.data || [])
     } catch (err) {
-      console.error('Failed to fetch providers:', err)
-      setError('Failed to load providers. Please try again.')
+      setError('Failed to load providers')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const { name, value } = e.target as HTMLInputElement
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,218 +93,336 @@ export default function BookAppointmentPage() {
         return
       }
 
-      // Validate form data
-      if (!formData.providerId) {
-        setError('Please select a provider')
-        setSubmitting(false)
-        return
-      }
-
-      if (!formData.startTime) {
-        setError('Please select a date and time')
-        setSubmitting(false)
-        return
-      }
-
-      if (!formData.reason || formData.reason.length < 5) {
-        setError('Please enter a reason (at least 5 characters)')
-        setSubmitting(false)
-        return
-      }
-
       const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          duration: parseInt(formData.duration),
+        }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
         setError(data.error || 'Failed to book appointment')
-        setSubmitting(false)
         return
       }
 
-      // Success - redirect to appointments list
       router.push('/appointments')
     } catch (err) {
-      console.error('Booking error:', err)
       setError('An error occurred. Please try again.')
+    } finally {
       setSubmitting(false)
     }
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('role')
-    localStorage.removeItem('userId')
-    router.push('/')
+  if (loading) {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <nav className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-8">
-              <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-                HealthCare+
-              </Link>
-              <div className="flex gap-4">
-                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900">
-                  Dashboard
-                </Link>
-                <Link href="/appointments" className="text-gray-700 hover:text-gray-900">
-                  Appointments
-                </Link>
-                <Link href="/providers" className="text-gray-700 hover:text-gray-900">
-                  Providers
-                </Link>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+  if (!mounted) return null
 
-      {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Book an Appointment</h1>
-          <p className="text-gray-600 mt-2">Schedule a new appointment with a healthcare provider</p>
-        </div>
+  const steps = ['Select Provider', 'Choose Date & Time', 'Add Details', 'Review & Book']
+
+  return (
+    <Box sx={{ minHeight: '100vh', background: '#FAFAFA' }}>
+      <Header />
+
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        {/* Back Button */}
+        <Link href="/appointments" style={{ textDecoration: 'none' }}>
+          <Button
+            startIcon={<ArrowLeft size={20} />}
+            sx={{
+              color: '#0066CC',
+              textTransform: 'none',
+              fontWeight: 600,
+              mb: 3,
+            }}
+          >
+            Back to Appointments
+          </Button>
+        </Link>
+
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Book an Appointment
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Schedule a consultation with a healthcare provider
+          </Typography>
+        </Box>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{error}</p>
-          </div>
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+            {error}
+          </Alert>
         )}
 
-        <div className="bg-white rounded-lg shadow p-8">
-          {loading ? (
-            <p className="text-gray-600">Loading providers...</p>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Provider Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Provider *
-                </label>
-                {providers.length === 0 ? (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <p className="text-yellow-800 text-sm mb-2">
-                      No providers available. Please register a provider account first.
-                    </p>
-                    <Link
-                      href="/auth/register"
-                      className="text-yellow-700 hover:text-yellow-900 font-medium text-sm"
+        {/* Stepper */}
+        <Card sx={{ borderRadius: 3, mb: 4 }}>
+          <CardContent sx={{ p: 3 }}>
+            <Stepper activeStep={step} sx={{ mb: 2 }}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </CardContent>
+        </Card>
+
+        {/* Form */}
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 4 }}>
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={3}>
+                {/* Step 1: Select Provider */}
+                {step === 0 && (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+                      👨‍⚕️ Select a Provider
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      select
+                      label="Healthcare Provider"
+                      name="providerId"
+                      value={formData.providerId}
+                      onChange={handleChange}
+                      required
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <User size={20} style={{ color: '#0066CC' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     >
-                      Register a Provider →
-                    </Link>
-                  </div>
-                ) : (
-                  <select
-                    value={formData.providerId}
-                    onChange={(e) => setFormData({ ...formData, providerId: e.target.value })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  >
-                    <option value="">Choose a provider...</option>
-                    {providers.map((provider) => (
-                      <option key={provider._id} value={provider._id}>
-                        Dr. {provider.firstName} {provider.lastName} - {provider.specialty}
-                      </option>
-                    ))}
-                  </select>
+                      {providers.map((provider) => (
+                        <MenuItem key={provider._id} value={provider._id}>
+                          Dr. {provider.firstName} {provider.lastName} - {provider.specialty}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Box>
                 )}
-              </div>
 
-              {/* Date and Time */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Appointment Date & Time *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Must be at least 2 hours from now
-                </p>
-              </div>
+                {/* Step 2: Choose Date & Time */}
+                {step === 1 && (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+                      📅 Choose Date & Time
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12 }}>
+                        <TextField
+                          fullWidth
+                          label="Date"
+                          name="startTime"
+                          type="datetime-local"
+                          value={formData.startTime}
+                          onChange={handleChange}
+                          required
+                          InputLabelProps={{ shrink: true }}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Calendar size={20} style={{ color: '#0066CC' }} />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <TextField
+                          fullWidth
+                          select
+                          label="Duration"
+                          name="duration"
+                          value={formData.duration}
+                          onChange={handleChange}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Clock size={20} style={{ color: '#0066CC' }} />
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        >
+                          <MenuItem value="15">15 minutes</MenuItem>
+                          <MenuItem value="30">30 minutes</MenuItem>
+                          <MenuItem value="45">45 minutes</MenuItem>
+                          <MenuItem value="60">1 hour</MenuItem>
+                        </TextField>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
 
-              {/* Duration */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Duration (minutes) *
-                </label>
-                <select
-                  value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                >
-                  <option value={15}>15 minutes</option>
-                  <option value={30}>30 minutes</option>
-                  <option value={45}>45 minutes</option>
-                  <option value={60}>1 hour</option>
-                  <option value={90}>1.5 hours</option>
-                  <option value={120}>2 hours</option>
-                </select>
-              </div>
+                {/* Step 3: Add Details */}
+                {step === 2 && (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+                      📝 Add Details
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={4}
+                      label="Reason for Visit"
+                      name="reason"
+                      value={formData.reason}
+                      onChange={handleChange}
+                      required
+                      placeholder="Describe your symptoms or reason for the appointment..."
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <FileText size={20} style={{ color: '#0066CC' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Box>
+                )}
 
-              {/* Reason */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Reason for Visit *
-                </label>
-                <textarea
-                  value={formData.reason}
-                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                  required
-                  minLength={5}
-                  maxLength={500}
-                  rows={4}
-                  placeholder="Describe the reason for your appointment..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {formData.reason.length}/500 characters
-                </p>
-              </div>
+                {/* Step 4: Review */}
+                {step === 3 && (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+                      ✅ Review Your Appointment
+                    </Typography>
+                    <Stack spacing={2}>
+                      <Card sx={{ background: '#F5F5F5', borderRadius: 2 }}>
+                        <CardContent>
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12 }}>
+                              <Typography variant="body2" color="textSecondary">
+                                Provider
+                              </Typography>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {providers.find((p) => p._id === formData.providerId)
+                                  ? `Dr. ${providers.find((p) => p._id === formData.providerId)?.firstName} ${providers.find((p) => p._id === formData.providerId)?.lastName}`
+                                  : 'Not selected'}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                              <Typography variant="body2" color="textSecondary">
+                                Date & Time
+                              </Typography>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {formData.startTime
+                                  ? new Date(formData.startTime).toLocaleDateString('en-US', {
+                                      weekday: 'short',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })
+                                  : 'Not selected'}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                              <Typography variant="body2" color="textSecondary">
+                                Duration
+                              </Typography>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {formData.duration} minutes
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 12 }}>
+                              <Typography variant="body2" color="textSecondary">
+                                Reason
+                              </Typography>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {formData.reason || 'Not provided'}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </CardContent>
+                      </Card>
+                    </Stack>
+                  </Box>
+                )}
 
-              {/* Buttons */}
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="submit"
-                  disabled={submitting || !formData.providerId || !formData.startTime || !formData.reason}
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-                >
-                  {submitting ? 'Booking...' : 'Book Appointment'}
-                </button>
-                <Link
-                  href="/appointments"
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md font-medium hover:bg-gray-300 transition-colors text-center"
-                >
-                  Cancel
-                </Link>
-              </div>
+                {/* Navigation Buttons */}
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', mt: 4 }}>
+                  <Button
+                    variant="outlined"
+                    disabled={step === 0}
+                    onClick={() => setStep(step - 1)}
+                    sx={{
+                      borderColor: '#0066CC',
+                      color: '#0066CC',
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      px: 3,
+                    }}
+                  >
+                    Previous
+                  </Button>
+
+                  {step < 3 ? (
+                    <Button
+                      variant="contained"
+                      onClick={() => setStep(step + 1)}
+                      sx={{
+                        background: 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)',
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        px: 3,
+                      }}
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      type="submit"
+                      disabled={submitting}
+                      sx={{
+                        background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        px: 3,
+                      }}
+                    >
+                      {submitting ? <CircularProgress size={24} color="inherit" /> : 'Book Appointment'}
+                    </Button>
+                  )}
+                </Box>
+              </Stack>
             </form>
-          )}
-        </div>
-      </main>
-    </div>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   )
 }

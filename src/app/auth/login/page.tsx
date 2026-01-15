@@ -1,15 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import {
+  Container,
+  Box,
+  Card,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  CircularProgress,
+  InputAdornment,
+  IconButton,
+  Divider,
+  Stack,
+} from '@mui/material'
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,101 +51,178 @@ export default function LoginPage() {
         return
       }
 
-      // Store token
       localStorage.setItem('token', data.data.token)
-      localStorage.setItem('userId', data.data.userId)
       localStorage.setItem('role', data.data.role)
+      localStorage.setItem('userId', data.data.userId)
 
-      // Redirect based on role
-      if (data.data.role === 'patient') {
-        router.push('/dashboard')
-      } else if (data.data.role === 'provider') {
-        router.push('/dashboard')
-      } else {
-        router.push('/dashboard')
-      }
+      router.push('/dashboard')
     } catch (err) {
       setError('An error occurred. Please try again.')
-      console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
+  if (!mounted) return null
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="text-center mb-8">
-            <Link href="/" className="text-3xl font-bold text-blue-600">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 4,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Card
+          elevation={8}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mb: 1,
+              }}
+            >
               HealthCare+
-            </Link>
-            <p className="text-gray-600 mt-2">Sign in to your account</p>
-          </div>
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Sign in to your account
+            </Typography>
+          </Box>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+              {error}
+            </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
-              <input
-                id="email"
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              {/* Email Field */}
+              <TextField
+                fullWidth
+                label="Email Address"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                placeholder="you@example.com"
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Mail size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
               />
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
+              {/* Password Field */}
+              <TextField
+                fullWidth
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                placeholder="••••••••"
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
               />
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
+              {/* Submit Button */}
+              <Button
+                fullWidth
+                variant="contained"
+                size="large"
+                type="submit"
+                disabled={loading}
+                sx={{
+                  background: 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)',
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #004B99 0%, #003366 100%)',
+                  },
+                }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+              </Button>
+            </Stack>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
-              Don't have an account?{' '}
-              <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                Register here
-              </Link>
-            </p>
-          </div>
+          <Divider sx={{ my: 3 }} />
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-3">Demo Credentials (after registration)</p>
-            <div className="space-y-2 text-xs text-gray-600">
-              <p>Create a patient or provider account to get started</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          {/* Register Link */}
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              Don&apos;t have an account?
+            </Typography>
+            <Link href="/auth/register" style={{ textDecoration: 'none' }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                sx={{
+                  borderColor: '#0066CC',
+                  color: '#0066CC',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 102, 204, 0.05)',
+                    borderColor: '#0066CC',
+                  },
+                }}
+              >
+                Create Account
+              </Button>
+            </Link>
+          </Box>
+        </Card>
+      </Container>
+    </Box>
   )
 }

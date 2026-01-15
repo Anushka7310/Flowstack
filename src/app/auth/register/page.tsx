@@ -1,551 +1,508 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import ValidationProgressBar from '@/components/ValidationProgressBar'
-
-type UserType = 'patient' | 'provider'
-
-interface ValidationErrors {
-  email?: string
-  password?: string
-  firstName?: string
-  lastName?: string
-  phone?: string
-  dateOfBirth?: string
-  address?: string
-  emergencyName?: string
-  emergencyPhone?: string
-  emergencyRelationship?: string
-  specialty?: string
-  licenseNumber?: string
-}
+import {
+  Container,
+  Box,
+  Card,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  CircularProgress,
+  InputAdornment,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+  Stack,
+  Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material'
+import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar } from 'lucide-react'
+import { ValidationProgressBar } from '@/components/ValidationProgressBar'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [userType, setUserType] = useState<UserType>('patient')
+  const [mounted, setMounted] = useState(false)
+  const [userType, setUserType] = useState<'patient' | 'provider'>('patient')
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    dateOfBirth: '',
+    specialty: '',
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  // Common fields
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [phone, setPhone] = useState('')
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  // Patient-specific fields
-  const [dateOfBirth, setDateOfBirth] = useState('')
-  const [address, setAddress] = useState('')
-  const [emergencyName, setEmergencyName] = useState('')
-  const [emergencyPhone, setEmergencyPhone] = useState('')
-  const [emergencyRelationship, setEmergencyRelationship] = useState('')
+  const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors }
 
-  // Provider-specific fields
-  const [specialty, setSpecialty] = useState('general_practice')
-  const [licenseNumber, setLicenseNumber] = useState('')
+    switch (name) {
+      case 'firstName':
+      case 'lastName':
+        if (!value.trim()) {
+          newErrors[name] = 'This field is required'
+        } else if (value.length < 2) {
+          newErrors[name] = 'Must be at least 2 characters'
+        } else {
+          delete newErrors[name]
+        }
+        break
 
-  // Validation functions
-  const validateEmail = (value: string): string | undefined => {
-    if (!value) return 'Email is required'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format'
-    return undefined
+      case 'email':
+        if (!value.trim()) {
+          newErrors.email = 'Email is required'
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Invalid email format'
+        } else {
+          delete newErrors.email
+        }
+        break
+
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Password is required'
+        } else if (value.length < 8) {
+          newErrors.password = 'Must be at least 8 characters'
+        } else if (!/[A-Z]/.test(value)) {
+          newErrors.password = 'Must contain uppercase letter'
+        } else if (!/[0-9]/.test(value)) {
+          newErrors.password = 'Must contain number'
+        } else {
+          delete newErrors.password
+        }
+        break
+
+      case 'confirmPassword':
+        if (!value) {
+          newErrors.confirmPassword = 'Please confirm password'
+        } else if (value !== formData.password) {
+          newErrors.confirmPassword = 'Passwords do not match'
+        } else {
+          delete newErrors.confirmPassword
+        }
+        break
+
+      case 'phone':
+        if (!value.trim()) {
+          newErrors.phone = 'Phone is required'
+        } else if (!/^\d{10,}$/.test(value.replace(/\D/g, ''))) {
+          newErrors.phone = 'Invalid phone number'
+        } else {
+          delete newErrors.phone
+        }
+        break
+
+      case 'dateOfBirth':
+        if (userType === 'patient' && !value) {
+          newErrors.dateOfBirth = 'Date of birth is required'
+        } else {
+          delete newErrors.dateOfBirth
+        }
+        break
+
+      case 'specialty':
+        if (userType === 'provider' && !value) {
+          newErrors.specialty = 'Specialty is required'
+        } else {
+          delete newErrors.specialty
+        }
+        break
+    }
+
+    setErrors(newErrors)
   }
 
-  const validatePassword = (value: string): string | undefined => {
-    if (!value) return 'Password is required'
-    if (value.length < 8) return 'Password must be at least 8 characters'
-    if (!/[A-Z]/.test(value)) return 'Password must contain at least one uppercase letter'
-    if (!/[a-z]/.test(value)) return 'Password must contain at least one lowercase letter'
-    if (!/[0-9]/.test(value)) return 'Password must contain at least one number'
-    return undefined
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    validateField(name, value)
   }
 
-  const validatePhone = (value: string): string | undefined => {
-    if (!value) return 'Phone is required'
-    if (!/^\+?[1-9]\d{1,14}$/.test(value)) return 'Invalid phone number format'
-    return undefined
-  }
-
-  const validateName = (value: string, fieldName: string): string | undefined => {
-    if (!value) return `${fieldName} is required`
-    if (value.length < 1) return `${fieldName} is required`
-    if (value.length > 50) return `${fieldName} must be less than 50 characters`
-    return undefined
-  }
-
-  const validateDateOfBirth = (value: string): string | undefined => {
-    if (!value) return 'Date of birth is required'
-    const dob = new Date(value)
-    const age = (Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
-    if (age < 0 || age > 120) return 'Invalid date of birth'
-    return undefined
-  }
-
-  const validateAddress = (value: string): string | undefined => {
-    if (!value) return 'Address is required'
-    if (value.length < 5) return 'Address must be at least 5 characters'
-    return undefined
-  }
-
-  const validateLicenseNumber = (value: string): string | undefined => {
-    if (!value) return 'License number is required'
-    if (value.length < 5) return 'License number must be at least 5 characters'
-    return undefined
-  }
-
-  // Handle field changes with validation
-  const handleEmailChange = (value: string) => {
-    setEmail(value)
-    const error = validateEmail(value)
-    setValidationErrors((prev) => ({
-      ...prev,
-      email: error,
-    }))
-  }
-
-  const handlePasswordChange = (value: string) => {
-    setPassword(value)
-    const error = validatePassword(value)
-    setValidationErrors((prev) => ({
-      ...prev,
-      password: error,
-    }))
-  }
-
-  const handlePhoneChange = (value: string) => {
-    setPhone(value)
-    const error = validatePhone(value)
-    setValidationErrors((prev) => ({
-      ...prev,
-      phone: error,
-    }))
-  }
-
-  const handleFirstNameChange = (value: string) => {
-    setFirstName(value)
-    const error = validateName(value, 'First name')
-    setValidationErrors((prev) => ({
-      ...prev,
-      firstName: error,
-    }))
-  }
-
-  const handleLastNameChange = (value: string) => {
-    setLastName(value)
-    const error = validateName(value, 'Last name')
-    setValidationErrors((prev) => ({
-      ...prev,
-      lastName: error,
-    }))
-  }
-
-  const handleDateOfBirthChange = (value: string) => {
-    setDateOfBirth(value)
-    const error = validateDateOfBirth(value)
-    setValidationErrors((prev) => ({
-      ...prev,
-      dateOfBirth: error,
-    }))
-  }
-
-  const handleAddressChange = (value: string) => {
-    setAddress(value)
-    const error = validateAddress(value)
-    setValidationErrors((prev) => ({
-      ...prev,
-      address: error,
-    }))
-  }
-
-  const handleLicenseNumberChange = (value: string) => {
-    setLicenseNumber(value)
-    const error = validateLicenseNumber(value)
-    setValidationErrors((prev) => ({
-      ...prev,
-      licenseNumber: error,
-    }))
+  const handleSelectChange = (e: any) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    validateField(name, value)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+
+    if (Object.keys(errors).length > 0) {
+      return
+    }
+
     setLoading(true)
 
     try {
-      const endpoint = userType === 'patient' 
-        ? '/api/auth/register/patient'
-        : '/api/auth/register/provider'
-
-      const body = userType === 'patient'
-        ? {
-            email,
-            password,
-            firstName,
-            lastName,
-            phone,
-            dateOfBirth,
-            address,
-            emergencyContact: {
-              name: emergencyName,
-              phone: emergencyPhone,
-              relationship: emergencyRelationship,
-            },
-          }
-        : {
-            email,
-            password,
-            firstName,
-            lastName,
-            phone,
-            specialty,
-            licenseNumber,
-            maxDailyAppointments: 8,
-          }
+      const endpoint =
+        userType === 'patient'
+          ? '/api/auth/register/patient'
+          : '/api/auth/register/provider'
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify(formData),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Registration failed')
+        setErrors({ submit: data.error || 'Registration failed' })
         return
       }
 
-      // Store token
       localStorage.setItem('token', data.data.token)
+      localStorage.setItem('role', data.data.role)
       localStorage.setItem('userId', data.data.userId)
-      localStorage.setItem('role', userType)
 
-      // Redirect to dashboard
       router.push('/dashboard')
     } catch (err) {
-      setError('An error occurred. Please try again.')
-      console.error(err)
+      setErrors({ submit: 'An error occurred. Please try again.' })
     } finally {
       setLoading(false)
     }
   }
 
+  const filledFields = [
+    formData.firstName,
+    formData.lastName,
+    formData.email,
+    formData.password,
+    formData.confirmPassword,
+    formData.phone,
+    userType === 'patient' ? formData.dateOfBirth : formData.specialty,
+  ].filter(Boolean).length
+
+  const totalFields = 7
+
+  if (!mounted) return null
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">
-      <div className="w-full max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="text-center mb-8">
-            <Link href="/" className="text-3xl font-bold text-blue-600">
-              HealthCare+
-            </Link>
-            <p className="text-gray-600 mt-2">Create your account</p>
-          </div>
-
-          {/* User Type Selection */}
-          <div className="flex gap-4 mb-6">
-            <button
-              type="button"
-              onClick={() => setUserType('patient')}
-              className={`flex-1 py-3 rounded-md font-medium transition-colors ${
-                userType === 'patient'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 4,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Card
+          elevation={8}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mb: 1,
+              }}
             >
-              Register as Patient
-            </button>
-            <button
-              type="button"
-              onClick={() => setUserType('provider')}
-              className={`flex-1 py-3 rounded-md font-medium transition-colors ${
-                userType === 'provider'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Register as Provider
-            </button>
-          </div>
+              Create Account
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Join HealthCare+ today
+            </Typography>
+          </Box>
 
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
+          {/* Progress Bar */}
+          <ValidationProgressBar filled={filledFields} total={totalFields} />
+
+          {/* User Type Toggle */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, mt: 3 }}>
+            <ToggleButtonGroup
+              value={userType}
+              exclusive
+              onChange={(e, newType) => {
+                if (newType) setUserType(newType)
+              }}
+              sx={{
+                '& .MuiToggleButton-root': {
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  px: 3,
+                },
+              }}
+            >
+              <ToggleButton value="patient">Patient</ToggleButton>
+              <ToggleButton value="provider">Provider</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {errors.submit && (
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+              {errors.submit}
+            </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Progress Bar */}
-            <ValidationProgressBar
-              validFields={
-                userType === 'patient'
-                  ? [
-                      firstName,
-                      lastName,
-                      email,
-                      password,
-                      phone,
-                      dateOfBirth,
-                      address,
-                      emergencyName,
-                      emergencyPhone,
-                      emergencyRelationship,
-                    ].filter((f) => f).length
-                  : [firstName, lastName, email, password, phone, specialty, licenseNumber].filter(
-                      (f) => f
-                    ).length
-              }
-              totalFields={userType === 'patient' ? 10 : 7}
-            />
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={2.5}>
+              {/* First Name */}
+              <TextField
+                fullWidth
+                label="First Name"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                error={!!errors.firstName}
+                helperText={errors.firstName}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <User size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              />
 
-            {/* Common Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => handleFirstNameChange(e.target.value)}
-                  required
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                    validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {validationErrors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">{validationErrors.firstName}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => handleLastNameChange(e.target.value)}
-                  required
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                    validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {validationErrors.lastName && (
-                  <p className="text-red-500 text-xs mt-1">{validationErrors.lastName}</p>
-                )}
-              </div>
-            </div>
+              {/* Last Name */}
+              <TextField
+                fullWidth
+                label="Last Name"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                error={!!errors.lastName}
+                helperText={errors.lastName}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <User size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
+              {/* Email */}
+              <TextField
+                fullWidth
+                label="Email Address"
+                name="email"
                 type="email"
-                value={email}
-                onChange={(e) => handleEmailChange(e.target.value)}
-                required
-                className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                  validationErrors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+                value={formData.email}
+                onChange={handleChange}
+                error={!!errors.email}
+                helperText={errors.email}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Mail size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
-              {validationErrors.email && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
-              )}
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => handlePasswordChange(e.target.value)}
-                required
-                minLength={8}
-                className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                  validationErrors.password ? 'border-red-500' : 'border-gray-300'
-                }`}
+              {/* Phone */}
+              <TextField
+                fullWidth
+                label="Phone Number"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                error={!!errors.phone}
+                helperText={errors.phone}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Phone size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
-              {validationErrors.password && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.password}</p>
+
+              {/* Patient-specific fields */}
+              {userType === 'patient' && (
+                <TextField
+                  fullWidth
+                  label="Date of Birth"
+                  name="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  error={!!errors.dateOfBirth}
+                  helperText={errors.dateOfBirth}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Calendar size={20} style={{ color: '#0066CC' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
               )}
-              {!validationErrors.password && password && (
-                <p className="text-green-500 text-xs mt-1">✓ Password is valid</p>
-              )}
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => handlePhoneChange(e.target.value)}
-                required
-                placeholder="+1234567890"
-                className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                  validationErrors.phone ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {validationErrors.phone && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.phone}</p>
-              )}
-            </div>
-
-            {/* Patient-specific fields */}
-            {userType === 'patient' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => handleDateOfBirthChange(e.target.value)}
-                    required
-                    className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                      validationErrors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {validationErrors.dateOfBirth && (
-                    <p className="text-red-500 text-xs mt-1">{validationErrors.dateOfBirth}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => handleAddressChange(e.target.value)}
-                    required
-                    className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                      validationErrors.address ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {validationErrors.address && (
-                    <p className="text-red-500 text-xs mt-1">{validationErrors.address}</p>
-                  )}
-                </div>
-
-                <div className="border-t pt-4 mt-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">
-                    Emergency Contact
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        value={emergencyName}
-                        onChange={(e) => setEmergencyName(e.target.value)}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Phone
-                        </label>
-                        <input
-                          type="tel"
-                          value={emergencyPhone}
-                          onChange={(e) => setEmergencyPhone(e.target.value)}
-                          required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Relationship
-                        </label>
-                        <input
-                          type="text"
-                          value={emergencyRelationship}
-                          onChange={(e) => setEmergencyRelationship(e.target.value)}
-                          required
-                          placeholder="e.g., Spouse"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Provider-specific fields */}
-            {userType === 'provider' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Specialty
-                  </label>
-                  <select
-                    value={specialty}
-                    onChange={(e) => setSpecialty(e.target.value)}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              {/* Provider-specific fields */}
+              {userType === 'provider' && (
+                <FormControl fullWidth error={!!errors.specialty}>
+                  <InputLabel>Specialty</InputLabel>
+                  <Select
+                    name="specialty"
+                    value={formData.specialty}
+                    onChange={handleSelectChange}
+                    label="Specialty"
+                    sx={{ borderRadius: 2 }}
                   >
-                    <option value="general_practice">General Practice</option>
-                    <option value="cardiology">Cardiology</option>
-                    <option value="dermatology">Dermatology</option>
-                    <option value="pediatrics">Pediatrics</option>
-                    <option value="orthopedics">Orthopedics</option>
-                    <option value="psychiatry">Psychiatry</option>
-                  </select>
-                </div>
+                    <MenuItem value="general_practice">General Practice</MenuItem>
+                    <MenuItem value="cardiology">Cardiology</MenuItem>
+                    <MenuItem value="dermatology">Dermatology</MenuItem>
+                    <MenuItem value="pediatrics">Pediatrics</MenuItem>
+                    <MenuItem value="orthopedics">Orthopedics</MenuItem>
+                    <MenuItem value="psychiatry">Psychiatry</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    License Number
-                  </label>
-                  <input
-                    type="text"
-                    value={licenseNumber}
-                    onChange={(e) => handleLicenseNumberChange(e.target.value)}
-                    required
-                    className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                      validationErrors.licenseNumber ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
-                  {validationErrors.licenseNumber && (
-                    <p className="text-red-500 text-xs mt-1">{validationErrors.licenseNumber}</p>
-                  )}
-                </div>
-              </>
-            )}
+              {/* Password */}
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleChange}
+                error={!!errors.password}
+                helperText={errors.password}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              />
 
-            <button
-              type="submit"
-              disabled={loading || Object.values(validationErrors).some((err) => err !== undefined)}
-              className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-colors mt-6"
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
+              {/* Confirm Password */}
+              <TextField
+                fullWidth
+                label="Confirm Password"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock size={20} style={{ color: '#0066CC' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              />
+
+              {/* Submit Button */}
+              <Button
+                fullWidth
+                variant="contained"
+                size="large"
+                type="submit"
+                disabled={loading || Object.keys(errors).length > 0}
+                sx={{
+                  background: 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)',
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  mt: 2,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #004B99 0%, #003366 100%)',
+                  },
+                }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+              </Button>
+            </Stack>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
-              Already have an account?{' '}
-              <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
-                Sign in here
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+          <Divider sx={{ my: 3 }} />
+
+          {/* Login Link */}
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+              Already have an account?
+            </Typography>
+            <Link href="/auth/login" style={{ textDecoration: 'none' }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                sx={{
+                  borderColor: '#0066CC',
+                  color: '#0066CC',
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 102, 204, 0.05)',
+                    borderColor: '#0066CC',
+                  },
+                }}
+              >
+                Sign In
+              </Button>
+            </Link>
+          </Box>
+        </Card>
+      </Container>
+    </Box>
   )
 }

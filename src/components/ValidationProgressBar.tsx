@@ -1,38 +1,42 @@
 'use client'
 
+import { Box, LinearProgress, Typography } from '@mui/material'
+
 interface ValidationProgressBarProps {
-  validFields: number
-  totalFields: number
+  filled: number
+  total: number
 }
 
-export default function ValidationProgressBar({
-  validFields,
-  totalFields,
-}: ValidationProgressBarProps) {
-  const percentage = (validFields / totalFields) * 100
+export function ValidationProgressBar({ filled, total }: ValidationProgressBarProps) {
+  const percentage = (filled / total) * 100
+
+  const getColor = () => {
+    if (percentage === 100) return 'success'
+    if (percentage >= 75) return 'info'
+    if (percentage >= 50) return 'warning'
+    return 'error'
+  }
 
   return (
-    <div className="mb-6">
-      <div className="flex justify-between items-center mb-2">
-        <p className="text-sm font-medium text-gray-700">Form Completion</p>
-        <p className="text-sm text-gray-600">
-          {validFields} of {totalFields} fields
-        </p>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-        <div
-          className={`h-full transition-all duration-300 ${
-            percentage === 100
-              ? 'bg-green-500'
-              : percentage >= 75
-              ? 'bg-blue-500'
-              : percentage >= 50
-              ? 'bg-yellow-500'
-              : 'bg-red-500'
-          }`}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-    </div>
+    <Box sx={{ mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+          Form Completion
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          {filled} of {total} fields
+        </Typography>
+      </Box>
+      <LinearProgress
+        variant="determinate"
+        value={percentage}
+        color={getColor()}
+        sx={{
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        }}
+      />
+    </Box>
   )
 }

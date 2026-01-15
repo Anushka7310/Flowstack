@@ -1,150 +1,307 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+} from '@mui/material'
+import { ArrowRight, Calendar, Users, Clock, Shield } from 'lucide-react'
 
 export default function HomePage() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <nav className="border-b bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-blue-600">HealthCare+</h1>
-            </div>
-            <div className="flex gap-4">
-              <Link
-                href="/auth/login"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Login
-              </Link>
-              <Link
-                href="/auth/register"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-              >
-                Register
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-            Healthcare Appointment
-            <span className="block text-blue-600">Management System</span>
-          </h2>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Streamline your clinic operations with our comprehensive appointment
-            management solution. Book appointments, manage schedules, and access
-            medical records securely.
-          </p>
-          <div className="mt-10 flex justify-center gap-4">
-            <Link
-              href="/auth/register"
-              className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
+    <Box sx={{ minHeight: '100vh', background: '#FAFAFA' }}>
+      {/* Navigation */}
+      <Box sx={{ background: '#FFFFFF', borderBottom: '1px solid #E0E0E0', py: 2 }}>
+        <Container maxWidth="lg">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
             >
-              Get Started
+              HealthCare+
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Link href="/auth/login" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    borderColor: '#0066CC',
+                    color: '#0066CC',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                  }}
+                >
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/auth/register" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    background: 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                  }}
+                >
+                  Get Started
+                </Button>
+              </Link>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Hero Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+          color: '#FFFFFF',
+          py: 12,
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="md">
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              fontSize: { xs: '2rem', md: '3rem' },
+            }}
+          >
+            Healthcare Made Simple
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 400,
+              mb: 4,
+              opacity: 0.95,
+              fontSize: { xs: '1rem', md: '1.25rem' },
+            }}
+          >
+            Book appointments with healthcare providers, manage your health records, and receive quality care
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/auth/register" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="contained"
+                size="large"
+                endIcon={<ArrowRight size={20} />}
+                sx={{
+                  background: '#FFFFFF',
+                  color: '#0066CC',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 2,
+                  '&:hover': {
+                    background: '#F5F5F5',
+                  },
+                }}
+              >
+                Start Now
+              </Button>
             </Link>
-            <Link
-              href="/about"
-              className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10"
+            <Link href="/auth/login" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="outlined"
+                size="large"
+                sx={{
+                  borderColor: '#FFFFFF',
+                  color: '#FFFFFF',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 2,
+                  '&:hover': {
+                    background: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                Sign In
+              </Button>
+            </Link>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Features Section */}
+      <Container maxWidth="lg" sx={{ py: 12 }}>
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Why Choose HealthCare+?
+          </Typography>
+          <Typography variant="body1" color="textSecondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+            Experience seamless healthcare management with our modern platform
+          </Typography>
+        </Box>
+
+        <Grid container spacing={4}>
+          {[
+            {
+              icon: Calendar,
+              title: 'Easy Booking',
+              description: 'Schedule appointments with healthcare providers in just a few clicks',
+              color: '#0066CC',
+            },
+            {
+              icon: Users,
+              title: 'Expert Providers',
+              description: 'Connect with qualified healthcare professionals across various specialties',
+              color: '#FF9800',
+            },
+            {
+              icon: Clock,
+              title: 'Flexible Scheduling',
+              description: 'Choose appointment times that work best for your schedule',
+              color: '#4CAF50',
+            },
+            {
+              icon: Shield,
+              title: 'Secure & Private',
+              description: 'Your health information is protected with enterprise-grade security',
+              color: '#00BCD4',
+            },
+          ].map((feature, index) => {
+            const Icon = feature.icon
+            return (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    height: '100%',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 12px 24px rgba(0, 0, 0, 0.12)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: 2,
+                        background: `${feature.color}20`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mx: 'auto',
+                        mb: 2,
+                      }}
+                    >
+                      <Icon size={32} color={feature.color} />
+                    </Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )
+          })}
+        </Grid>
+      </Container>
+
+      {/* CTA Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+          color: '#FFFFFF',
+          py: 12,
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="md">
+          <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+            Ready to Get Started?
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 4, opacity: 0.95 }}>
+            Join thousands of patients and providers using HealthCare+ for better healthcare management
+          </Typography>
+          <Link href="/auth/register" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="contained"
+              size="large"
+              sx={{
+                background: '#FFFFFF',
+                color: '#0066CC',
+                textTransform: 'none',
+                fontWeight: 700,
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                '&:hover': {
+                  background: '#F5F5F5',
+                },
+              }}
             >
-              Learn More
-            </Link>
-          </div>
-        </div>
+              Create Your Account
+            </Button>
+          </Link>
+        </Container>
+      </Box>
 
-        <div className="mt-24">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="pt-6">
-              <div className="flow-root bg-white rounded-lg px-6 pb-8">
-                <div className="-mt-6">
-                  <div className="inline-flex items-center justify-center p-3 bg-blue-600 rounded-md shadow-lg">
-                    <svg
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">
-                    Easy Scheduling
-                  </h3>
-                  <p className="mt-5 text-base text-gray-500">
-                    Book appointments with real-time availability checking and
-                    automated conflict prevention.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <div className="flow-root bg-white rounded-lg px-6 pb-8">
-                <div className="-mt-6">
-                  <div className="inline-flex items-center justify-center p-3 bg-blue-600 rounded-md shadow-lg">
-                    <svg
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">
-                    Provider Management
-                  </h3>
-                  <p className="mt-5 text-base text-gray-500">
-                    Manage provider schedules, specialties, and availability with
-                    flexible configuration options.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <div className="flow-root bg-white rounded-lg px-6 pb-8">
-                <div className="-mt-6">
-                  <div className="inline-flex items-center justify-center p-3 bg-blue-600 rounded-md shadow-lg">
-                    <svg
-                      className="h-6 w-6 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">
-                    Secure & Compliant
-                  </h3>
-                  <p className="mt-5 text-base text-gray-500">
-                    Role-based access control and encrypted data storage ensure
-                    patient privacy and security.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+      {/* Footer */}
+      <Box sx={{ background: '#FFFFFF', borderTop: '1px solid #E0E0E0', py: 4 }}>
+        <Container maxWidth="lg">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+            <Typography variant="body2" color="textSecondary">
+              © 2026 HealthCare+. All rights reserved.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 3 }}>
+              <Typography variant="body2" sx={{ color: '#0066CC', cursor: 'pointer', fontWeight: 600 }}>
+                Privacy Policy
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#0066CC', cursor: 'pointer', fontWeight: 600 }}>
+                Terms of Service
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#0066CC', cursor: 'pointer', fontWeight: 600 }}>
+                Contact Us
+              </Typography>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+    </Box>
   )
 }

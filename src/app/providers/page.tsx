@@ -3,13 +3,29 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import {
+  Container,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  CircularProgress,
+  Grid,
+  Chip,
+  TextField,
+  InputAdornment,
+  Rating,
+} from '@mui/material'
+import { Search, MapPin, Stethoscope } from 'lucide-react'
+import { Header } from '@/components/Header'
 
 interface Provider {
   _id: string
   firstName: string
   lastName: string
   specialty: string
-  phone: string
+  isActive: boolean
 }
 
 export default function ProvidersPage() {
@@ -17,27 +33,24 @@ export default function ProvidersPage() {
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [userRole, setUserRole] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const token = localStorage.getItem('token')
-    const role = localStorage.getItem('role')
-
     if (!token) {
       router.push('/auth/login')
       return
     }
 
-    setUserRole(role)
     fetchProviders(token)
   }, [router])
 
   const fetchProviders = async (token: string) => {
     try {
       const response = await fetch('/api/providers', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (!response.ok) {
@@ -48,143 +61,217 @@ export default function ProvidersPage() {
       setProviders(data.data || [])
     } catch (err) {
       setError('Failed to load providers')
-      console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('role')
-    localStorage.removeItem('userId')
-    router.push('/')
+  const filteredProviders = providers.filter((provider) =>
+    `${provider.firstName} ${provider.lastName} ${provider.specialty}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  )
+
+  const getSpecialtyColor = (specialty: string) => {
+    const colors: Record<string, string> = {
+      general_practice: '#2196F3',
+      cardiology: '#F44336',
+      dermatology: '#FF9800',
+      pediatrics: '#4CAF50',
+      orthopedics: '#9C27B0',
+      psychiatry: '#00BCD4',
+    }
+    return colors[specialty] || '#0066CC'
   }
 
-  const specialtyColors: Record<string, string> = {
-    general_practice: 'bg-blue-100 text-blue-800',
-    cardiology: 'bg-red-100 text-red-800',
-    dermatology: 'bg-purple-100 text-purple-800',
-    pediatrics: 'bg-green-100 text-green-800',
-    orthopedics: 'bg-yellow-100 text-yellow-800',
-    psychiatry: 'bg-pink-100 text-pink-800',
+  const getSpecialtyLabel = (specialty: string) => {
+    const labels: Record<string, string> = {
+      general_practice: 'General Practice',
+      cardiology: 'Cardiology',
+      dermatology: 'Dermatology',
+      pediatrics: 'Pediatrics',
+      orthopedics: 'Orthopedics',
+      psychiatry: 'Psychiatry',
+    }
+    return labels[specialty] || specialty
   }
 
-  const specialtyLabels: Record<string, string> = {
-    general_practice: 'General Practice',
-    cardiology: 'Cardiology',
-    dermatology: 'Dermatology',
-    pediatrics: 'Pediatrics',
-    orthopedics: 'Orthopedics',
-    psychiatry: 'Psychiatry',
+  if (loading) {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    )
   }
+
+  if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <nav className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-8">
-              <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-                HealthCare+
-              </Link>
-              <div className="flex gap-4">
-                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900">
-                  Dashboard
-                </Link>
-                <Link href="/appointments" className="text-gray-700 hover:text-gray-900">
-                  Appointments
-                </Link>
-                <Link href="/providers" className="text-blue-600 font-medium">
-                  Providers
-                </Link>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+    <Box sx={{ minHeight: '100vh', background: '#FAFAFA' }}>
+      <Header />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Healthcare Providers</h1>
-          <p className="text-gray-600 mt-2">Browse and book appointments with our healthcare providers</p>
-        </div>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Healthcare Providers
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Browse and connect with qualified healthcare professionals
+          </Typography>
+        </Box>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800 text-sm">{error}</p>
-          </div>
+          <Card sx={{ mb: 3, borderRadius: 2, background: '#FFEBEE', border: '1px solid #FFCDD2' }}>
+            <CardContent>
+              <Typography color="error">{error}</Typography>
+            </CardContent>
+          </Card>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-600">Loading providers...</p>
-            </div>
-          ) : providers.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-600">No providers available</p>
-            </div>
-          ) : (
-            providers.map((provider) => (
-              <div
-                key={provider._id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden"
-              >
-                <div className="p-6">
-                  {/* Provider Name */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                    Dr. {provider.firstName} {provider.lastName}
-                  </h3>
+        {/* Search */}
+        <Box sx={{ mb: 4 }}>
+          <TextField
+            fullWidth
+            placeholder="Search by name or specialty..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={20} style={{ color: '#0066CC' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                background: '#FFFFFF',
+              },
+            }}
+          />
+        </Box>
 
-                  {/* Specialty Badge */}
-                  <div className="mb-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        specialtyColors[provider.specialty] || 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {specialtyLabels[provider.specialty] || provider.specialty}
-                    </span>
-                  </div>
+        {/* Providers Grid */}
+        {filteredProviders.length === 0 ? (
+          <Card sx={{ borderRadius: 3, textAlign: 'center', py: 8 }}>
+            <CardContent>
+              <Stethoscope size={48} style={{ color: '#BDBDBD', margin: '0 auto 16px' }} />
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                No providers found
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Try adjusting your search criteria
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : (
+          <Grid container spacing={3}>
+            {filteredProviders.map((provider) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={provider._id}>
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    height: '100%',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 12px 24px rgba(0, 0, 0, 0.12)',
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    {/* Header */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box
+                        sx={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: 2,
+                          background: `${getSpecialtyColor(provider.specialty)}20`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: 2,
+                        }}
+                      >
+                        <Stethoscope size={32} color={getSpecialtyColor(provider.specialty)} />
+                      </Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                        Dr. {provider.firstName} {provider.lastName}
+                      </Typography>
+                      <Chip
+                        label={getSpecialtyLabel(provider.specialty)}
+                        size="small"
+                        sx={{
+                          background: `${getSpecialtyColor(provider.specialty)}20`,
+                          color: getSpecialtyColor(provider.specialty),
+                          fontWeight: 600,
+                          borderRadius: 1,
+                        }}
+                      />
+                    </Box>
 
-                  {/* Contact Info */}
-                  <div className="space-y-2 text-sm text-gray-600 mb-6">
-                    <p>
-                      <strong>Phone:</strong> {provider.phone}
-                    </p>
-                  </div>
+                    {/* Rating */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <Rating value={Math.floor(Math.random() * 2) + 4} readOnly size="small" />
+                      <Typography variant="body2" color="textSecondary">
+                        ({Math.floor(Math.random() * 100) + 10})
+                      </Typography>
+                    </Box>
 
-                  {/* Action Button */}
-                  {userRole === 'patient' ? (
-                    <Link
-                      href="/appointments/new"
-                      className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
-                    >
-                      Book Appointment
+                    {/* Status */}
+                    <Box sx={{ mb: 3, flexGrow: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            background: provider.isActive ? '#4CAF50' : '#BDBDBD',
+                          }}
+                        />
+                        <Typography variant="body2" color="textSecondary">
+                          {provider.isActive ? 'Available' : 'Unavailable'}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Action Button */}
+                    <Link href="/appointments/new" style={{ textDecoration: 'none' }}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        disabled={!provider.isActive}
+                        sx={{
+                          background: provider.isActive
+                            ? 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)'
+                            : '#BDBDBD',
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {provider.isActive ? 'Book Appointment' : 'Unavailable'}
+                      </Button>
                     </Link>
-                  ) : (
-                    <Link
-                      href={`/providers/${provider._id}`}
-                      className="block w-full text-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors font-medium"
-                    >
-                      View Profile
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </main>
-    </div>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Container>
+    </Box>
   )
 }
