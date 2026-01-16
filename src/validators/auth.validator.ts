@@ -16,7 +16,7 @@ export const registerPatientSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
   firstName: z.string().min(1, 'First name is required').max(50),
   lastName: z.string().min(1, 'Last name is required').max(50),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number'),
+  phone: z.string().regex(/^\d{10,}$/, 'Invalid phone number'),
   dateOfBirth: z.string().refine((date) => {
     const dob = new Date(date)
     const age = (Date.now() - dob.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
@@ -25,7 +25,7 @@ export const registerPatientSchema = z.object({
   address: z.string().min(5, 'Address is required'),
   emergencyContact: z.object({
     name: z.string().min(1, 'Emergency contact name is required'),
-    phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number'),
+    phone: z.string().regex(/^\d{10,}$/, 'Invalid phone number'),
     relationship: z.string().min(1, 'Relationship is required'),
   }),
   insuranceInfo: z
@@ -46,7 +46,7 @@ export const registerProviderSchema = z.object({
     .regex(/[0-9]/, 'Password must contain at least one number'),
   firstName: z.string().min(1, 'First name is required').max(50),
   lastName: z.string().min(1, 'Last name is required').max(50),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number'),
+  phone: z.string().regex(/^\d{10,}$/, 'Invalid phone number'),
   specialty: z.nativeEnum(ProviderSpecialty),
   licenseNumber: z.string().min(5, 'License number is required'),
   maxDailyAppointments: z.number().min(1).max(20).default(8),

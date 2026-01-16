@@ -15,7 +15,7 @@ export class AuthService {
     this.providerRepo = new ProviderRepository()
   }
 
-  async registerPatient(input: RegisterPatientInput): Promise<{ token: string; userId: string }> {
+  async registerPatient(input: RegisterPatientInput): Promise<{ token: string; userId: string; role: UserRole }> {
     // Check if email already exists
     const existingPatient = await this.patientRepo.findByEmail(input.email)
     if (existingPatient) {
@@ -44,10 +44,11 @@ export class AuthService {
     return {
       token,
       userId: patient._id.toString(),
+      role: UserRole.PATIENT,
     }
   }
 
-  async registerProvider(input: RegisterProviderInput): Promise<{ token: string; userId: string }> {
+  async registerProvider(input: RegisterProviderInput): Promise<{ token: string; userId: string; role: UserRole }> {
     // Check if email already exists
     const existingProvider = await this.providerRepo.findByEmail(input.email)
     if (existingProvider) {
@@ -81,12 +82,13 @@ export class AuthService {
     return {
       token,
       userId: provider._id.toString(),
+      role: UserRole.PROVIDER,
     }
   }
 
   async login(input: LoginInput): Promise<{ token: string; userId: string; role: UserRole }> {
     // Try to find user as patient first
-    let user = await this.patientRepo.findByEmail(input.email)
+    let user: any = await this.patientRepo.findByEmail(input.email)
     let role = UserRole.PATIENT
 
     // If not found, try provider

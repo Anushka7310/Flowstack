@@ -65,6 +65,10 @@ export class AppointmentService {
     const dayOfWeek = startTime.getDay()
     const timeString = `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')}`
 
+    if (!provider.availability || provider.availability.length === 0) {
+      throw new ValidationError('Provider has not set their availability yet. Please choose another provider.')
+    }
+
     const isWithinAvailability = provider.availability.some((avail) => {
       return (
         avail.dayOfWeek === dayOfWeek &&
@@ -75,7 +79,7 @@ export class AppointmentService {
     })
 
     if (!isWithinAvailability) {
-      throw new ValidationError('Appointment time is outside provider availability')
+      throw new ValidationError('Appointment time is outside provider availability. Please choose a different time.')
     }
 
     // Create appointment with patient snapshot
@@ -169,7 +173,10 @@ export class AppointmentService {
       throw new ForbiddenError('Patients cannot update appointment status')
     }
 
-    const updated = await this.appointmentRepo.update(id, input)
+    const updated = await this.appointmentRepo.update(id, {
+      ...input,
+      startTime: input.startTime ? new Date(input.startTime) : undefined,
+    })
     if (!updated) {
       throw new NotFoundError('Failed to update appointment')
     }

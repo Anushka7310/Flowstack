@@ -21,6 +21,8 @@ interface DashboardStats {
   totalAppointments: number
   upcomingAppointments: number
   completedAppointments: number
+  patientCount?: number
+  providerCount?: number
 }
 
 export default function DashboardPage() {
@@ -46,16 +48,41 @@ export default function DashboardPage() {
 
   const fetchStats = async (token: string) => {
     try {
-      const response = await fetch('/api/appointments', {
+      // Fetch appointments
+      const appointmentsResponse = await fetch('/api/appointments', {
         headers: { Authorization: `Bearer ${token}` },
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch stats')
+      if (!appointmentsResponse.ok) {
+        throw new Error('Failed to fetch appointments')
       }
 
-      const data = await response.json()
-      const appointments = data.data?.appointments || []
+      const appointmentsData = await appointmentsResponse.json()
+      const appointments = appointmentsData.data?.appointments || []
+
+      // Fetch patient count
+      const patientsResponse = await fetch('/api/patients', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      let patientCount = 0
+      if (patientsResponse.ok) {
+        const patientsData = await patientsResponse.json()
+        // patientsData.data is an array of patients
+        patientCount = Array.isArray(patientsData.data) ? patientsData.data.length : 0
+      }
+
+      // Fetch provider count
+      const providersResponse = await fetch('/api/providers', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      let providerCount = 0
+      if (providersResponse.ok) {
+        const providersData = await providersResponse.json()
+        // providersData.data is an array of providers
+        providerCount = Array.isArray(providersData.data) ? providersData.data.length : 0
+      }
 
       const stats: DashboardStats = {
         totalAppointments: appointments.length,
@@ -63,6 +90,8 @@ export default function DashboardPage() {
           (a: any) => a.status === 'scheduled' || a.status === 'confirmed'
         ).length,
         completedAppointments: appointments.filter((a: any) => a.status === 'completed').length,
+        patientCount,
+        providerCount,
       }
 
       setStats(stats)
@@ -209,7 +238,7 @@ export default function DashboardPage() {
             <StatCard
               icon={Users}
               title={userRole === 'provider' ? 'Patients' : 'Providers'}
-              value={Math.floor(Math.random() * 50) + 10}
+              value={userRole === 'provider' ? (stats?.patientCount || 0) : (stats?.providerCount || 0)}
               color="#00BCD4"
             />
           </Grid>

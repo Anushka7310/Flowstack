@@ -48,6 +48,50 @@ export function handleError(error: unknown): { message: string; statusCode: numb
     }
   }
 
+  // Handle Zod validation errors
+  if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
+    const zodError = error as any
+    const firstError = zodError.errors?.[0]
+    const message = firstError 
+      ? `${firstError.path.join('.')}: ${firstError.message}`
+      : 'Validation failed'
+    
+    console.error('Zod validation error:', zodError.errors)
+    
+    return {
+      message,
+      statusCode: 400,
+    }
+  }
+
+  // Handle Mongoose validation errors
+  if (error && typeof error === 'object' && 'name' in error && error.name === 'ValidationError') {
+    const mongooseError = error as any
+    const firstError = Object.values(mongooseError.errors || {})[0] as any
+    const message = firstError?.message || 'Validation failed'
+    
+    console.error('Mongoose validation error:', mongooseError.errors)
+    
+    return {
+      message,
+      statusCode: 400,
+    }
+  }
+
+  // Handle Mongoose duplicate key errors
+  if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
+    const duplicateError = error as any
+    const field = Object.keys(duplicateError.keyPattern || {})[0]
+    const message = field ? `${field} already exists` : 'Duplicate entry'
+    
+    console.error('Duplicate key error:', duplicateError)
+    
+    return {
+      message,
+      statusCode: 409,
+    }
+  }
+
   // Log unexpected errors but don't expose details
   console.error('Unexpected error:', error)
 

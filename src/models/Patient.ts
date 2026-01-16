@@ -67,11 +67,14 @@ const patientSchema = new Schema<IPatient>(
       provider: {
         type: String,
         trim: true,
+        default: null,
       },
       policyNumber: {
         type: String,
         trim: true,
+        default: null,
       },
+      _id: false,
     },
     isActive: {
       type: Boolean,

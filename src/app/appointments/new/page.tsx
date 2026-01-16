@@ -93,6 +93,33 @@ export default function BookAppointmentPage() {
         return
       }
 
+      // Validate all required fields
+      if (!formData.providerId) {
+        setError('Please select a provider')
+        setSubmitting(false)
+        return
+      }
+
+      if (!formData.startTime) {
+        setError('Please select a date and time')
+        setSubmitting(false)
+        return
+      }
+
+      if (!formData.reason || formData.reason.trim().length < 5) {
+        setError('Please provide a reason for the appointment (at least 5 characters)')
+        setSubmitting(false)
+        return
+      }
+
+      // Convert datetime-local to ISO string
+      const startDateTime = new Date(formData.startTime)
+      if (isNaN(startDateTime.getTime())) {
+        setError('Invalid date/time format')
+        setSubmitting(false)
+        return
+      }
+
       const response = await fetch('/api/appointments', {
         method: 'POST',
         headers: {
@@ -100,20 +127,24 @@ export default function BookAppointmentPage() {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...formData,
+          providerId: formData.providerId,
+          startTime: startDateTime.toISOString(),
           duration: parseInt(formData.duration),
+          reason: formData.reason.trim(),
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
+        console.error('Booking error:', data)
         setError(data.error || 'Failed to book appointment')
         return
       }
 
       router.push('/appointments')
     } catch (err) {
+      console.error('Submit error:', err)
       setError('An error occurred. Please try again.')
     } finally {
       setSubmitting(false)
@@ -374,7 +405,10 @@ export default function BookAppointmentPage() {
                   <Button
                     variant="outlined"
                     disabled={step === 0}
-                    onClick={() => setStep(step - 1)}
+                    onClick={() => {
+                      setError('')
+                      setStep(step - 1)
+                    }}
                     sx={{
                       borderColor: '#0066CC',
                       color: '#0066CC',
@@ -390,7 +424,10 @@ export default function BookAppointmentPage() {
                   {step < 3 ? (
                     <Button
                       variant="contained"
-                      onClick={() => setStep(step + 1)}
+                      onClick={() => {
+                        setError('')
+                        setStep(step + 1)
+                      }}
                       sx={{
                         background: 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)',
                         borderRadius: 2,

@@ -4,13 +4,18 @@ import { AppointmentStatus } from '@/types'
 export const createAppointmentSchema = z.object({
   providerId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid provider ID'),
   startTime: z.string().refine((date) => {
-    const appointmentDate = new Date(date)
-    const now = new Date()
-    const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000)
-    return appointmentDate >= twoHoursFromNow
+    try {
+      const appointmentDate = new Date(date)
+      if (isNaN(appointmentDate.getTime())) return false
+      const now = new Date()
+      const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+      return appointmentDate >= twoHoursFromNow
+    } catch {
+      return false
+    }
   }, 'Appointments must be booked at least 2 hours in advance'),
-  duration: z.number().min(15).max(120).default(30), // minutes
-  reason: z.string().min(5, 'Reason is required').max(500),
+  duration: z.number().min(15, 'Duration must be at least 15 minutes').max(120, 'Duration cannot exceed 120 minutes').default(30), // minutes
+  reason: z.string().min(5, 'Reason must be at least 5 characters').max(500, 'Reason cannot exceed 500 characters'),
 })
 
 export const updateAppointmentSchema = z.object({

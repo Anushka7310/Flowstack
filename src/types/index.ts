@@ -53,8 +53,8 @@ export interface IPatient extends IUser {
     relationship: string
   }
   insuranceInfo?: {
-    provider: string
-    policyNumber: string
+    provider?: string
+    policyNumber?: string
   }
 }
 
