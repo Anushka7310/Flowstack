@@ -97,35 +97,55 @@ export default function DashboardPage() {
     <Card
       sx={{
         height: '100%',
-        background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
-        border: `2px solid ${color}30`,
-        borderRadius: 3,
-        transition: 'all 0.3s ease',
+        background: `linear-gradient(135deg, ${color}12 0%, ${color}04 100%)`,
+        border: `1.5px solid ${color}20`,
+        borderRadius: 2.5,
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-8px)',
-          boxShadow: `0 12px 24px ${color}20`,
+          boxShadow: `0 16px 40px ${color}25`,
+          borderColor: `${color}40`,
         },
       }}
     >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2.5 }}>
           <Box
             sx={{
-              p: 2,
+              p: 1.5,
               borderRadius: 2,
-              background: `${color}20`,
+              background: `${color}15`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              minWidth: 48,
+              height: 48,
             }}
           >
-            <Icon size={32} color={color} />
+            <Icon size={28} color={color} />
           </Box>
-          <Box>
-            <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                mb: 0.5,
+              }}
+            >
               {title}
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700, color }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                color,
+                fontSize: '2rem',
+              }}
+            >
               {value}
             </Typography>
           </Box>
@@ -135,17 +155,17 @@ export default function DashboardPage() {
   )
 
   return (
-    <Box sx={{ minHeight: '100vh', background: '#FAFAFA' }}>
+    <Box sx={{ minHeight: '100vh', background: '#F5F7FA' }}>
       <Header />
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: 6 }}>
         {/* Welcome Section */}
-        <Box sx={{ mb: 6 }}>
+        <Box sx={{ mb: 8 }}>
           <Typography
             variant="h3"
             sx={{
               fontWeight: 700,
-              mb: 1,
+              mb: 1.5,
               background: 'linear-gradient(135deg, #0066CC 0%, #00BCD4 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
@@ -154,13 +174,13 @@ export default function DashboardPage() {
           >
             Welcome back!
           </Typography>
-          <Typography variant="body1" color="textSecondary">
+          <Typography variant="body1" color="textSecondary" sx={{ fontWeight: 500 }}>
             Here&apos;s what&apos;s happening with your appointments today.
           </Typography>
         </Box>
 
         {/* Stats Grid */}
-        <Grid container spacing={3} sx={{ mb: 6 }}>
+        <Grid container spacing={3} sx={{ mb: 8 }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <StatCard
               icon={Calendar}
@@ -196,12 +216,26 @@ export default function DashboardPage() {
         </Grid>
 
         {/* Quick Actions */}
-        <Card sx={{ borderRadius: 3, mb: 6 }}>
+        <Card
+          sx={{
+            borderRadius: 2.5,
+            border: '1px solid #E8EAED',
+            mb: 8,
+            background: '#FFFFFF',
+          }}
+        >
           <CardContent sx={{ p: 4 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                mb: 3.5,
+                color: '#1A1A1A',
+              }}
+            >
               Quick Actions
             </Typography>
-            <Grid container spacing={2}>
+            <Grid container spacing={2.5}>
               {userRole === 'patient' && (
                 <>
                   <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -287,19 +321,33 @@ export default function DashboardPage() {
         {/* Info Cards */}
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ borderRadius: 3, height: '100%' }}>
+            <Card
+              sx={{
+                borderRadius: 2.5,
+                border: '1px solid #E8EAED',
+                height: '100%',
+                background: 'linear-gradient(135deg, #E3F2FD 0%, #F5F7FA 100%)',
+              }}
+            >
               <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2.5,
+                    color: '#1A1A1A',
+                  }}
+                >
                   📋 How It Works
                 </Typography>
                 <Stack spacing={2}>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
                     ✓ {userRole === 'patient' ? 'Browse available providers and book appointments' : 'Manage your availability and appointments'}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
                     ✓ {userRole === 'patient' ? 'Receive confirmations and reminders' : 'Confirm or reject appointment requests'}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
                     ✓ {userRole === 'patient' ? 'Rate your experience after appointments' : 'Complete appointments and add notes'}
                   </Typography>
                 </Stack>
@@ -307,19 +355,33 @@ export default function DashboardPage() {
             </Card>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Card sx={{ borderRadius: 3, height: '100%' }}>
+            <Card
+              sx={{
+                borderRadius: 2.5,
+                border: '1px solid #E8EAED',
+                height: '100%',
+                background: 'linear-gradient(135deg, #F0F4FF 0%, #F5F7FA 100%)',
+              }}
+            >
               <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 2.5,
+                    color: '#1A1A1A',
+                  }}
+                >
                   🎯 Tips
                 </Typography>
                 <Stack spacing={2}>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
                     • Keep your profile information up to date
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
                     • Check your appointments regularly
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="body2" color="textSecondary" sx={{ fontWeight: 500 }}>
                     • Provide feedback to help us improve
                   </Typography>
                 </Stack>

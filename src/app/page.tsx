@@ -11,7 +11,7 @@ import {
   Card,
   CardContent,
 } from '@mui/material'
-import { ArrowRight, Calendar, Users, Clock, Shield } from 'lucide-react'
+import { ArrowRight, Calendar, Users, Clock, Shield, Github, Linkedin, Globe } from 'lucide-react'
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false)
@@ -288,16 +288,82 @@ export default function HomePage() {
             <Typography variant="body2" color="textSecondary">
               © 2026 HealthCare+. All rights reserved.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 3 }}>
-              <Typography variant="body2" sx={{ color: '#0066CC', cursor: 'pointer', fontWeight: 600 }}>
-                Privacy Policy
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#0066CC', cursor: 'pointer', fontWeight: 600 }}>
-                Terms of Service
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#0066CC', cursor: 'pointer', fontWeight: 600 }}>
-                Contact Us
-              </Typography>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <a href="https://github.com/Anushka7310" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#0066CC',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 24px rgba(0, 102, 204, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(0, 102, 204, 0.3)',
+                    },
+                  }}
+                >
+                  <Github size={22} color="#FFFFFF" />
+                </Box>
+              </a>
+              <a href="https://www.imanushka.xyz/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#0066CC',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 24px rgba(0, 102, 204, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(0, 102, 204, 0.3)',
+                    },
+                  }}
+                >
+                  <Globe size={22} color="#FFFFFF" />
+                </Box>
+              </a>
+              <a href="https://www.linkedin.com/in/imanushka/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: '#0066CC',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 24px rgba(0, 102, 204, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(0, 102, 204, 0.3)',
+                    },
+                  }}
+                >
+                  <Linkedin size={22} color="#FFFFFF" />
+                </Box>
+              </a>
             </Box>
           </Box>
         </Container>
