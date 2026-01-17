@@ -139,7 +139,7 @@ export default function AppointmentDetailPage() {
       const data = await response.json()
       setAppointment(data.data)
       setOpenDialog(false)
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setUpdatingStatus(false)
@@ -179,7 +179,7 @@ export default function AppointmentDetailPage() {
       setProviderNotes('')
       setPrescription('')
       setOpenDialog(false)
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setUpdatingStatus(false)
@@ -219,7 +219,7 @@ export default function AppointmentDetailPage() {
       setAppointment(data.data)
       setSelectedRating(null)
       setPatientFeedback('')
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setSubmittingRating(false)
@@ -548,7 +548,7 @@ export default function AppointmentDetailPage() {
                   </Typography>
                   <Rating
                     value={selectedRating}
-                    onChange={(e, value) => setSelectedRating(value)}
+                    onChange={(_e, value) => setSelectedRating(value)}
                     size="large"
                   />
                 </Box>

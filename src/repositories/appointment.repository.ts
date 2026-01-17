@@ -8,7 +8,7 @@ export class AppointmentRepository {
     return appointment.save()
   }
 
-  async findById(id: string): Promise<any> {
+  async findById(id: string): Promise<Record<string, unknown> | null> {
     return Appointment.findOne({
       _id: id,
       deletedAt: null,
@@ -18,7 +18,7 @@ export class AppointmentRepository {
       .lean()
   }
 
-  async findByIdWithReferences(id: string): Promise<any> {
+  async findByIdWithReferences(id: string): Promise<Record<string, unknown> | null> {
     return Appointment.findOne({
       _id: id,
       deletedAt: null,
@@ -31,7 +31,7 @@ export class AppointmentRepository {
   async findByPatient(
     patientId: string,
     options: { skip: number; limit: number }
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     return Appointment.find({
       patientId: new Types.ObjectId(patientId),
       deletedAt: null,
@@ -47,7 +47,7 @@ export class AppointmentRepository {
     providerId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     return Appointment.find({
       providerId: new Types.ObjectId(providerId),
       startTime: { $gte: startDate, $lte: endDate },
@@ -64,7 +64,7 @@ export class AppointmentRepository {
     endTime: Date,
     excludeId?: string
   ): Promise<IAppointment[]> {
-    const query: any = {
+    const query: Record<string, unknown> = {
       providerId: new Types.ObjectId(providerId),
       deletedAt: null,
       status: { $nin: [AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW] },
@@ -96,7 +96,7 @@ export class AppointmentRepository {
     })
   }
 
-  async update(id: string, data: Partial<IAppointment>): Promise<any> {
+  async update(id: string, data: Partial<IAppointment>): Promise<Record<string, unknown> | null> {
     return Appointment.findOneAndUpdate(
       { _id: id, deletedAt: null },
       { $set: data },

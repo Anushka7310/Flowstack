@@ -30,11 +30,11 @@ export async function GET(request: NextRequest) {
     )
 
     // Get unique patient IDs
-    const patientIds = [...new Set(appointments.map((apt) => apt.patientId.toString()))]
+    const patientIds = [...new Set(appointments.map((apt) => (apt as Record<string, unknown>).patientId?.toString()).filter(Boolean))]
 
     // Fetch patient details
     const patients = await Promise.all(
-      patientIds.map((patientId) => patientRepo.findById(patientId))
+      patientIds.map((patientId) => patientRepo.findById(patientId as string))
     )
 
     // Filter out null values and return
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get patients error:', error)
     const { message, statusCode } = handleError(error)
 

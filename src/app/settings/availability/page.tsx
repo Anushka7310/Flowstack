@@ -13,8 +13,6 @@ import {
   Stack,
   TextField,
   Switch,
-  FormControlLabel,
-  Grid,
   Alert,
   Table,
   TableBody,
@@ -24,7 +22,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material'
-import { ArrowLeft, Clock, Save } from 'lucide-react'
+import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
 import { Header } from '@/components/Header'
 
@@ -121,7 +119,7 @@ export default function AvailabilityPage() {
 
       setSuccess('Availability updated successfully!')
       setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setSaving(false)

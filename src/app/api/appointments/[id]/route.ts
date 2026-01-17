@@ -8,16 +8,17 @@ import { ApiResponse } from '@/types'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
     const user = await authenticate(request)
     const appointmentService = new AppointmentService()
+    const { id } = await params
 
     const appointment = await appointmentService.getAppointmentById(
-      params.id,
+      id,
       user.userId,
       user.role
     )
@@ -28,7 +29,7 @@ export async function GET(
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('GET /api/appointments/[id] error:', error)
     const { message, statusCode } = handleError(error)
 
@@ -43,18 +44,19 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
     const user = await authenticate(request)
-    const body = await request.json()
+    const body = await request.json() as Record<string, unknown>
     const validatedData = updateAppointmentSchema.parse(body)
+    const { id } = await params
 
     const appointmentService = new AppointmentService()
     const appointment = await appointmentService.updateAppointment(
-      params.id,
+      id,
       user.userId,
       user.role,
       validatedData
@@ -67,7 +69,7 @@ export async function PATCH(
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('PATCH /api/appointments/[id] error:', error)
     const { message, statusCode } = handleError(error)
 
@@ -82,15 +84,16 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
 
     const user = await authenticate(request)
     const appointmentService = new AppointmentService()
+    const { id } = await params
 
-    await appointmentService.cancelAppointment(params.id, user.userId, user.role)
+    await appointmentService.cancelAppointment(id, user.userId, user.role)
 
     const response: ApiResponse = {
       success: true,
@@ -98,7 +101,7 @@ export async function DELETE(
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('DELETE /api/appointments/[id] error:', error)
     const { message, statusCode } = handleError(error)
 

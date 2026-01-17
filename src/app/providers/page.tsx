@@ -17,7 +17,7 @@ import {
   InputAdornment,
   Rating,
 } from '@mui/material'
-import { Search, MapPin, Stethoscope } from 'lucide-react'
+import { Search, Stethoscope } from 'lucide-react'
 import { Header } from '@/components/Header'
 
 interface Provider {
@@ -59,7 +59,7 @@ export default function ProvidersPage() {
 
       const data = await response.json()
       setProviders(data.data || [])
-    } catch (err) {
+    } catch {
       setError('Failed to load providers')
     } finally {
       setLoading(false)

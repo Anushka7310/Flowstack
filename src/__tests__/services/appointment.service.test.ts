@@ -7,7 +7,6 @@ import { hashPassword } from '@/lib/auth/password'
 import {
   NotFoundError,
   ConflictError,
-  ValidationError,
   ForbiddenError,
 } from '@/lib/utils/errors'
 import { UserRole, ProviderSpecialty, AppointmentStatus } from '@/types'

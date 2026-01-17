@@ -85,9 +85,9 @@ export async function GET(request: NextRequest) {
       const slotEnd = new Date(slotStart)
       slotEnd.setMinutes(slotEnd.getMinutes() + duration)
 
-      const hasConflict = existingAppointments.some((apt: any) => {
-        const aptStart = new Date(apt.startTime)
-        const aptEnd = new Date(apt.endTime)
+      const hasConflict = existingAppointments.some((apt: Record<string, unknown>) => {
+        const aptStart = new Date(apt.startTime as string)
+        const aptEnd = new Date(apt.endTime as string)
         return (
           apt.status !== AppointmentStatus.CANCELLED &&
           apt.status !== AppointmentStatus.NO_SHOW &&
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(response)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('GET /api/providers/availability error:', error)
     const { message, statusCode } = handleError(error)
 

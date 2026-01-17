@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import type { SelectChangeEvent } from '@mui/material'
 import {
   Container,
   Box,
@@ -247,8 +248,9 @@ export default function RegisterPage() {
     }
   }
 
-  const handleSelectChange = (e: any) => {
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
+    if (!name) return
     setFormData((prev) => ({ ...prev, [name]: value }))
     validateField(name, value)
     // Clear submit error when user edits a field

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as Record<string, unknown>
     const validatedData = loginSchema.parse(body)
 
     const authService = new AuthService()
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error)
     const { message, statusCode } = handleError(error)
 

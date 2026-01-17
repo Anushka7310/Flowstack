@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error)
     const { message, statusCode } = handleError(error)
 

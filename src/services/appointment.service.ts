@@ -8,7 +8,7 @@ import {
   ConflictError,
   ForbiddenError,
 } from '@/lib/utils/errors'
-import { AppointmentStatus } from '@/types'
+import { AppointmentStatus, type IAppointment } from '@/types'
 import type { CreateAppointmentInput, UpdateAppointmentInput } from '@/validators/appointment.validator'
 
 export class AppointmentService {
@@ -25,7 +25,7 @@ export class AppointmentService {
   async createAppointment(
     patientId: string,
     input: CreateAppointmentInput
-  ): Promise<any> {
+  ): Promise<IAppointment> {
     // Validate provider exists and is active
     const provider = await this.providerRepo.findById(input.providerId)
     if (!provider || !provider.isActive) {
@@ -101,15 +101,15 @@ export class AppointmentService {
     return appointment
   }
 
-  async getAppointmentById(id: string, userId: string, userRole: string): Promise<any> {
+  async getAppointmentById(id: string, userId: string, userRole: string): Promise<Record<string, unknown>> {
     const appointment = await this.appointmentRepo.findByIdWithReferences(id)
     if (!appointment) {
       throw new NotFoundError('Appointment not found')
     }
 
     // Authorization check - handle both ObjectId and string comparisons
-    const patientIdStr = appointment.patientId?._id?.toString() || appointment.patientId?.toString()
-    const providerIdStr = appointment.providerId?._id?.toString() || appointment.providerId?.toString()
+    const patientIdStr = (appointment.patientId as Record<string, unknown>)?._id?.toString() || (appointment.patientId as string)?.toString()
+    const providerIdStr = (appointment.providerId as Record<string, unknown>)?._id?.toString() || (appointment.providerId as string)?.toString()
 
     if (userRole === 'patient' && patientIdStr !== userId) {
       throw new ForbiddenError('Access denied')
@@ -126,7 +126,7 @@ export class AppointmentService {
     patientId: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<{ appointments: any[]; total: number }> {
+  ): Promise<{ appointments: Record<string, unknown>[]; total: number }> {
     const skip = (page - 1) * limit
     const appointments = await this.appointmentRepo.findByPatient(patientId, {
       skip,
@@ -141,7 +141,7 @@ export class AppointmentService {
     providerId: string,
     startDate: Date,
     endDate: Date
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     return this.appointmentRepo.findByProvider(providerId, startDate, endDate)
   }
 
@@ -150,15 +150,15 @@ export class AppointmentService {
     userId: string,
     userRole: string,
     input: UpdateAppointmentInput
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     const appointment = await this.appointmentRepo.findById(id)
     if (!appointment) {
       throw new NotFoundError('Appointment not found')
     }
 
     // Authorization check - handle both ObjectId and string comparisons
-    const patientIdStr = appointment.patientId?._id?.toString() || appointment.patientId?.toString()
-    const providerIdStr = appointment.providerId?._id?.toString() || appointment.providerId?.toString()
+    const patientIdStr = (appointment.patientId as Record<string, unknown>)?._id?.toString() || (appointment.patientId as string)?.toString()
+    const providerIdStr = (appointment.providerId as Record<string, unknown>)?._id?.toString() || (appointment.providerId as string)?.toString()
 
     if (userRole === 'patient' && patientIdStr !== userId) {
       throw new ForbiddenError('Access denied')
@@ -195,14 +195,14 @@ export class AppointmentService {
     }
 
     // Authorization check - handle both ObjectId and string comparisons
-    const patientIdStr = appointment.patientId?._id?.toString() || appointment.patientId?.toString()
+    const patientIdStr = (appointment.patientId as Record<string, unknown>)?._id?.toString() || appointment.patientId?.toString()
 
     if (userRole === 'patient' && patientIdStr !== userId) {
       throw new ForbiddenError('Access denied')
     }
 
     // Check cancellation window (24 hours for patients)
-    if (userRole === 'patient' && !isWithinCancellationWindow(appointment.startTime)) {
+    if (userRole === 'patient' && !isWithinCancellationWindow(appointment.startTime as Date)) {
       throw new ValidationError(
         'Appointments can only be cancelled at least 24 hours in advance'
       )

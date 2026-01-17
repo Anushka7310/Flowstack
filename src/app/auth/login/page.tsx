@@ -64,7 +64,7 @@ export default function LoginPage() {
       localStorage.setItem('userId', data.data.userId)
 
       router.push('/dashboard')
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)

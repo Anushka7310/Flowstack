@@ -87,9 +87,9 @@ export default function DashboardPage() {
       const stats: DashboardStats = {
         totalAppointments: appointments.length,
         upcomingAppointments: appointments.filter(
-          (a: any) => a.status === 'scheduled' || a.status === 'confirmed'
+          (a: Record<string, unknown>) => a.status === 'scheduled' || a.status === 'confirmed'
         ).length,
-        completedAppointments: appointments.filter((a: any) => a.status === 'completed').length,
+        completedAppointments: appointments.filter((a: Record<string, unknown>) => a.status === 'completed').length,
         patientCount,
         providerCount,
       }
@@ -118,7 +118,7 @@ export default function DashboardPage() {
     value,
     color,
   }: {
-    icon: any
+    icon: React.ComponentType<{ size: number; color: string }>
     title: string
     value: number
     color: string

@@ -43,40 +43,40 @@ export function AvailableSlots({
       return
     }
 
+    const fetchAvailableSlots = async () => {
+      setLoading(true)
+      setError('')
+      setSlots([])
+
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) return
+
+        const response = await fetch(
+          `/api/providers/availability?providerId=${providerId}&date=${selectedDate}&duration=${duration}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        if (!response.ok) {
+          const data = await response.json()
+          setError(data.error || 'Failed to fetch available slots')
+          return
+        }
+
+        const data = await response.json()
+        setSlots(data.data || [])
+      } catch (err) {
+        console.error('Error fetching slots:', err)
+        setError('Failed to load available slots')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchAvailableSlots()
   }, [providerId, selectedDate, duration])
-
-  const fetchAvailableSlots = async () => {
-    setLoading(true)
-    setError('')
-    setSlots([])
-
-    try {
-      const token = localStorage.getItem('token')
-      if (!token) return
-
-      const response = await fetch(
-        `/api/providers/availability?providerId=${providerId}&date=${selectedDate}&duration=${duration}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-
-      if (!response.ok) {
-        const data = await response.json()
-        setError(data.error || 'Failed to fetch available slots')
-        return
-      }
-
-      const data = await response.json()
-      setSlots(data.data || [])
-    } catch (err) {
-      console.error('Error fetching slots:', err)
-      setError('Failed to load available slots')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (!providerId || !selectedDate) {
     return null

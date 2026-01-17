@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     await connectDB()
 
     // Authenticate user
-    const user = await authenticate(request)
+    await authenticate(request)
 
     const providerRepo = new ProviderRepository()
     const page = parseInt(request.nextUrl.searchParams.get('page') || '1')
@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit
     const providers = await providerRepo.findAll({ skip, limit })
-    const total = await providerRepo.count()
 
     const response: ApiResponse = {
       success: true,
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Get providers error:', error)
     const { message, statusCode } = handleError(error)
 

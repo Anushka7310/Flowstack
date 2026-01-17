@@ -15,7 +15,7 @@ export async function authenticate(request: NextRequest): Promise<JWTPayload> {
   try {
     const payload = await verifyToken(token)
     return payload
-  } catch (error) {
+  } catch {
     throw new UnauthorizedError('Invalid or expired token')
   }
 }

@@ -16,7 +16,7 @@ declare global {
   var mongooseCache: MongooseCache | undefined
 }
 
-let cached: MongooseCache = global.mongooseCache || {
+const cached: MongooseCache = global.mongooseCache || {
   conn: null,
   promise: null,
 }
@@ -40,7 +40,7 @@ export async function connectDB(): Promise<typeof mongoose> {
     }
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log('✅ MongoDB connected successfully')
+      console.warn('✅ MongoDB connected successfully')
       return mongoose
     })
   }
@@ -61,6 +61,6 @@ export async function disconnectDB(): Promise<void> {
     await cached.conn.disconnect()
     cached.conn = null
     cached.promise = null
-    console.log('✅ MongoDB disconnected')
+    console.warn('✅ MongoDB disconnected')
   }
 }

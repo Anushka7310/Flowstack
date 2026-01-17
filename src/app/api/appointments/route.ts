@@ -45,18 +45,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const body = await request.json() as Record<string, unknown>
     
     // Validate input
     let validatedData
     try {
       validatedData = createAppointmentSchema.parse(body)
-    } catch (validationError: any) {
+    } catch (validationError: unknown) {
       console.error('Validation error:', validationError)
+      const errorMsg = validationError && typeof validationError === 'object' && 'errors' in validationError
+        ? (validationError as Record<string, unknown>).errors
+        : 'Invalid input data'
       return NextResponse.json(
         {
           success: false,
-          error: validationError.errors?.[0]?.message || 'Invalid input data',
+          error: Array.isArray(errorMsg) && errorMsg[0] && typeof errorMsg[0] === 'object' && 'message' in errorMsg[0]
+            ? (errorMsg[0] as Record<string, unknown>).message
+            : 'Invalid input data',
         },
         { status: 400 }
       )
@@ -75,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Appointment creation error:', error)
     const { message, statusCode } = handleError(error)
 
@@ -134,7 +139,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(response, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('GET /api/appointments error:', error)
     const { message, statusCode } = handleError(error)
 

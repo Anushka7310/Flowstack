@@ -3,7 +3,7 @@ import { signToken } from '@/lib/auth/jwt'
 import { PatientRepository } from '@/repositories/patient.repository'
 import { ProviderRepository } from '@/repositories/provider.repository'
 import { UnauthorizedError, ConflictError } from '@/lib/utils/errors'
-import { UserRole, JWTPayload } from '@/types'
+import { UserRole, JWTPayload, type IPatient, type IProvider } from '@/types'
 import type { RegisterPatientInput, RegisterProviderInput, LoginInput } from '@/validators/auth.validator'
 
 export class AuthService {
@@ -88,7 +88,7 @@ export class AuthService {
 
   async login(input: LoginInput): Promise<{ token: string; userId: string; role: UserRole }> {
     // Try to find user as patient first
-    let user: any = await this.patientRepo.findByEmail(input.email)
+    let user: IPatient | IProvider | null = await this.patientRepo.findByEmail(input.email)
     let role = UserRole.PATIENT
 
     // If not found, try provider
@@ -107,7 +107,7 @@ export class AuthService {
     }
 
     // Verify password
-    const isPasswordValid = await comparePassword(input.password, user.password)
+    const isPasswordValid = await comparePassword(input.password, user.password as string)
     if (!isPasswordValid) {
       throw new UnauthorizedError('Invalid email or password')
     }

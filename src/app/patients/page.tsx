@@ -64,7 +64,7 @@ export default function PatientsPage() {
 
       const data = await response.json()
       setPatients(data.data || [])
-    } catch (err) {
+    } catch {
       setError('Failed to load patients')
     } finally {
       setLoading(false)

@@ -50,13 +50,14 @@ export function handleError(error: unknown): { message: string; statusCode: numb
 
   // Handle Zod validation errors
   if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
-    const zodError = error as any
-    const firstError = zodError.errors?.[0]
+    const zodError = error as Record<string, unknown>
+    const errors = zodError.errors as Array<Record<string, unknown>> | undefined
+    const firstError = errors?.[0]
     const message = firstError 
-      ? `${firstError.path.join('.')}: ${firstError.message}`
+      ? `${(firstError.path as Array<string>).join('.')}: ${firstError.message}`
       : 'Validation failed'
     
-    console.error('Zod validation error:', zodError.errors)
+    console.error('Zod validation error:', errors)
     
     return {
       message,
@@ -66,9 +67,10 @@ export function handleError(error: unknown): { message: string; statusCode: numb
 
   // Handle Mongoose validation errors
   if (error && typeof error === 'object' && 'name' in error && error.name === 'ValidationError') {
-    const mongooseError = error as any
-    const firstError = Object.values(mongooseError.errors || {})[0] as any
-    const message = firstError?.message || 'Validation failed'
+    const mongooseError = error as Record<string, unknown>
+    const errorValues = Object.values(mongooseError.errors || {}) as Array<Record<string, unknown>>
+    const firstError = errorValues[0]
+    const message = (firstError?.message as string) || 'Validation failed'
     
     console.error('Mongoose validation error:', mongooseError.errors)
     
@@ -80,8 +82,9 @@ export function handleError(error: unknown): { message: string; statusCode: numb
 
   // Handle Mongoose duplicate key errors
   if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
-    const duplicateError = error as any
-    const field = Object.keys(duplicateError.keyPattern || {})[0]
+    const duplicateError = error as Record<string, unknown>
+    const keyPattern = duplicateError.keyPattern as Record<string, unknown> | undefined
+    const field = keyPattern ? Object.keys(keyPattern)[0] : undefined
     const message = field ? `${field} already exists` : 'Duplicate entry'
     
     console.error('Duplicate key error:', duplicateError)

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { UserRole, ProviderSpecialty } from '@/types'
+import { ProviderSpecialty } from '@/types'
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),

@@ -72,7 +72,7 @@ export default function BookAppointmentPage() {
 
       const data = await response.json()
       setProviders(data.data || [])
-    } catch (err) {
+    } catch {
       setError('Failed to load providers')
     } finally {
       setLoading(false)
@@ -152,8 +152,8 @@ export default function BookAppointmentPage() {
       }
 
       router.push('/appointments')
-    } catch (err) {
-      console.error('Submit error:', err)
+    } catch (error) {
+      console.error('Submit error:', error)
       setError('An error occurred. Please try again.')
     } finally {
       setSubmitting(false)
