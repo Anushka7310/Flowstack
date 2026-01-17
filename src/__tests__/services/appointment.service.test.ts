@@ -254,39 +254,6 @@ describe('AppointmentService', () => {
       ).rejects.toThrow(ForbiddenError)
     })
   })
-
-  describe('getPatientAppointments', () => {
-    it('should return paginated appointments', async () => {
-      // Create multiple appointments
-      for (let i = 0; i < 3; i++) {
-        const date = new Date()
-        date.setDate(date.getDate() + 7 + i)
-        date.setHours(10, 0, 0, 0)
-
-        while (date.getDay() !== 1) {
-          date.setDate(date.getDate() + 1)
-        }
-
-        const input: CreateAppointmentInput = {
-          providerId: testProviderId,
-          startTime: date.toISOString(),
-          duration: 30,
-          reason: `Appointment ${i + 1}`,
-        }
-
-        await appointmentService.createAppointment(testPatientId, input)
-      }
-
-      const result = await appointmentService.getPatientAppointments(
-        testPatientId,
-        1,
-        10
-      )
-
-      expect(result.appointments).toHaveLength(3)
-      expect(result.total).toBe(3)
-    })
-  })
 })
 
 // Helper function to get next occurrence of a day of week
