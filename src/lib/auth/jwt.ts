@@ -15,7 +15,7 @@ export async function signToken(payload: JWTPayload): Promise<string> {
     ? parseInt(JWT_EXPIRES_IN) * 24 * 60 * 60
     : parseInt(JWT_EXPIRES_IN)
 
-  return new SignJWT(payload)
+  return new SignJWT(payload as unknown as Record<string, unknown>)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${expiresIn}s`)
@@ -23,10 +23,10 @@ export async function signToken(payload: JWTPayload): Promise<string> {
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload> {
-  try {
-    const { payload } = await jwtVerify(token, secret)
-    return payload as JWTPayload
-  } catch (error) {
-    throw new Error('Invalid or expired token')
-  }
+  const { payload } = await jwtVerify(token, secret)
+  return {
+    userId: payload.userId as string,
+    email: payload.email as string,
+    role: payload.role as string,
+  } as JWTPayload
 }

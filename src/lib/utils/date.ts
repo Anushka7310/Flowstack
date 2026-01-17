@@ -1,4 +1,4 @@
-import { addMinutes, isWithinInterval, parseISO, format } from 'date-fns'
+import { addMinutes, format } from 'date-fns'
 
 export function addDuration(date: Date, minutes: number): Date {
   return addMinutes(date, minutes)
@@ -27,8 +27,4 @@ export function isWithinCancellationWindow(appointmentTime: Date): boolean {
 
 export function formatAppointmentTime(date: Date): string {
   return format(date, 'MMM dd, yyyy h:mm a')
-}
-
-export function parseISODate(dateString: string): Date {
-  return parseISO(dateString)
 }

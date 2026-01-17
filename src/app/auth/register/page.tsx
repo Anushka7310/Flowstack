@@ -237,12 +237,28 @@ export default function RegisterPage() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     validateField(name, value)
+    // Clear submit error when user edits a field
+    if (errors.submit) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors.submit
+        return newErrors
+      })
+    }
   }
 
   const handleSelectChange = (e: any) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     validateField(name, value)
+    // Clear submit error when user edits a field
+    if (errors.submit) {
+      setErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors.submit
+        return newErrors
+      })
+    }
   }
 
   const handleUserTypeChange = (newType: 'patient' | 'provider') => {

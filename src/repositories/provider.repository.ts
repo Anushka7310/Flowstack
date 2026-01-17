@@ -1,4 +1,3 @@
-import { Types } from 'mongoose'
 import Provider from '@/models/Provider'
 import { IProvider, ProviderSpecialty } from '@/types'
 

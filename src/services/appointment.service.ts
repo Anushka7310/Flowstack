@@ -8,7 +8,7 @@ import {
   ConflictError,
   ForbiddenError,
 } from '@/lib/utils/errors'
-import { AppointmentStatus, IAppointment } from '@/types'
+import { AppointmentStatus } from '@/types'
 import type { CreateAppointmentInput, UpdateAppointmentInput } from '@/validators/appointment.validator'
 
 export class AppointmentService {

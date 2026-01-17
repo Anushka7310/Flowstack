@@ -14,7 +14,7 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
-      select: false, // Don't include password by default
+      select: false,
     },
     role: {
       type: String,
@@ -53,13 +53,7 @@ const userSchema = new Schema<IUser>(
   }
 )
 
-// Compound index for active users by role
 userSchema.index({ role: 1, isActive: 1 })
-
-// Soft delete query helper
-userSchema.query.active = function () {
-  return this.where({ deletedAt: null, isActive: true })
-}
 
 const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>('User', userSchema)

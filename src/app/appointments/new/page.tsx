@@ -23,6 +23,7 @@ import {
 } from '@mui/material'
 import { ArrowLeft, Calendar, Clock, User, FileText } from 'lucide-react'
 import { Header } from '@/components/Header'
+import { AvailableSlots } from '@/components/AvailableSlots'
 
 interface Provider {
   _id: string
@@ -39,8 +40,10 @@ export default function BookAppointmentPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [mounted, setMounted] = useState(false)
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     providerId: '',
+    selectedDate: '',
     startTime: '',
     duration: '30',
     reason: '',
@@ -81,6 +84,12 @@ export default function BookAppointmentPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target
+    setFormData((prev) => ({ ...prev, selectedDate: value }))
+    setSelectedSlot(null)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -101,7 +110,7 @@ export default function BookAppointmentPage() {
       }
 
       if (!formData.startTime) {
-        setError('Please select a date and time')
+        setError('Please select a time slot')
         setSubmitting(false)
         return
       }
@@ -161,8 +170,6 @@ export default function BookAppointmentPage() {
 
   if (!mounted) return null
 
-  const steps = ['Select Provider', 'Choose Date & Time', 'Add Details', 'Review & Book']
-
   return (
     <Box sx={{ minHeight: '100vh', background: '#FAFAFA' }}>
       <Header />
@@ -213,7 +220,7 @@ export default function BookAppointmentPage() {
         <Card sx={{ borderRadius: 3, mb: 4 }}>
           <CardContent sx={{ p: 3 }}>
             <Stepper activeStep={step} sx={{ mb: 2 }}>
-              {steps.map((label) => (
+              {['Select Provider', 'Choose Date', 'Pick Time', 'Add Details', 'Review & Book'].map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
                 </Step>
@@ -227,7 +234,7 @@ export default function BookAppointmentPage() {
           <CardContent sx={{ p: 4 }}>
             <form onSubmit={handleSubmit}>
               <Stack spacing={3}>
-                {/* Step 1: Select Provider */}
+                {/* Step 0: Select Provider */}
                 {step === 0 && (
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
@@ -259,62 +266,81 @@ export default function BookAppointmentPage() {
                   </Box>
                 )}
 
-                {/* Step 2: Choose Date & Time */}
+                {/* Step 1: Choose Date */}
                 {step === 1 && (
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-                      📅 Choose Date & Time
+                      📅 Choose a Date
                     </Typography>
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 12 }}>
-                        <TextField
-                          fullWidth
-                          label="Date"
-                          name="startTime"
-                          type="datetime-local"
-                          value={formData.startTime}
-                          onChange={handleChange}
-                          required
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <Calendar size={20} style={{ color: '#0066CC' }} />
-                              </InputAdornment>
-                            ),
-                          }}
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        />
-                      </Grid>
-                      <Grid size={{ xs: 12 }}>
-                        <TextField
-                          fullWidth
-                          select
-                          label="Duration"
-                          name="duration"
-                          value={formData.duration}
-                          onChange={handleChange}
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <Clock size={20} style={{ color: '#0066CC' }} />
-                              </InputAdornment>
-                            ),
-                          }}
-                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        >
-                          <MenuItem value="15">15 minutes</MenuItem>
-                          <MenuItem value="30">30 minutes</MenuItem>
-                          <MenuItem value="45">45 minutes</MenuItem>
-                          <MenuItem value="60">1 hour</MenuItem>
-                        </TextField>
-                      </Grid>
-                    </Grid>
+                    <TextField
+                      fullWidth
+                      label="Select Date"
+                      name="selectedDate"
+                      type="date"
+                      value={formData.selectedDate}
+                      onChange={handleDateChange}
+                      required
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Calendar size={20} style={{ color: '#0066CC' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Box>
+                )}
+
+                {/* Step 2: Pick Time */}
+                {step === 2 && (
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+                      🕐 Pick a Time Slot
+                    </Typography>
+                    <Box sx={{ mb: 3 }}>
+                      <TextField
+                        fullWidth
+                        select
+                        label="Duration"
+                        name="duration"
+                        value={formData.duration}
+                        onChange={handleChange}
+                        size="small"
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Clock size={18} style={{ color: '#0066CC' }} />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      >
+                        <MenuItem value="15">15 minutes</MenuItem>
+                        <MenuItem value="30">30 minutes</MenuItem>
+                        <MenuItem value="45">45 minutes</MenuItem>
+                        <MenuItem value="60">1 hour</MenuItem>
+                      </TextField>
+                    </Box>
+
+                    {formData.providerId && formData.selectedDate && (
+                      <AvailableSlots
+                        providerId={formData.providerId}
+                        selectedDate={formData.selectedDate}
+                        duration={parseInt(formData.duration)}
+                        onSlotSelect={(dateTime) => {
+                          setFormData((prev) => ({ ...prev, startTime: dateTime }))
+                          setSelectedSlot(dateTime.split('T')[1])
+                        }}
+                        selectedSlot={selectedSlot}
+                      />
+                    )}
                   </Box>
                 )}
 
                 {/* Step 3: Add Details */}
-                {step === 2 && (
+                {step === 3 && (
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
                       📝 Add Details
@@ -342,7 +368,7 @@ export default function BookAppointmentPage() {
                 )}
 
                 {/* Step 4: Review */}
-                {step === 3 && (
+                {step === 4 && (
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
                       ✅ Review Your Appointment
@@ -421,13 +447,19 @@ export default function BookAppointmentPage() {
                     Previous
                   </Button>
 
-                  {step < 3 ? (
+                  {step < 4 ? (
                     <Button
                       variant="contained"
                       onClick={() => {
                         setError('')
                         setStep(step + 1)
                       }}
+                      disabled={
+                        (step === 0 && !formData.providerId) ||
+                        (step === 1 && !formData.selectedDate) ||
+                        (step === 2 && !formData.startTime) ||
+                        (step === 3 && !formData.reason)
+                      }
                       sx={{
                         background: 'linear-gradient(135deg, #0066CC 0%, #004B99 100%)',
                         borderRadius: 2,
