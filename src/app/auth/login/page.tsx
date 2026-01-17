@@ -152,19 +152,20 @@ export default function LoginPage() {
                   </Typography>
                   <Box
                     sx={{
-                      width: 24,
-                      height: 24,
+                      width: 32,
+                      height: 32,
                       borderRadius: '50%',
                       background: formProgress === 100 ? '#4CAF50' : formProgress >= 50 ? '#2196F3' : '#FF9800',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: '#FFFFFF',
-                      fontSize: '0.7rem',
+                      fontSize: '0.75rem',
                       fontWeight: 700,
+                      boxShadow: formProgress === 100 ? '0 2px 8px rgba(76, 175, 80, 0.4)' : 'none',
                     }}
                   >
-                    {Math.round(formProgress)}%
+                    {formProgress === 100 ? '✓' : `${Math.round(formProgress)}%`}
                   </Box>
                 </Box>
                 <LinearProgress

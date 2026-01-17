@@ -121,7 +121,9 @@ export default function BookAppointmentPage() {
         return
       }
 
-      // Convert datetime-local to ISO string
+      // Convert datetime-local format to ISO string properly
+      // formData.startTime is in format "2026-01-17T13:00"
+      // We need to treat this as local time and convert to ISO
       const startDateTime = new Date(formData.startTime)
       if (isNaN(startDateTime.getTime())) {
         setError('Invalid date/time format')
@@ -329,9 +331,9 @@ export default function BookAppointmentPage() {
                         providerId={formData.providerId}
                         selectedDate={formData.selectedDate}
                         duration={parseInt(formData.duration)}
-                        onSlotSelect={(dateTime) => {
+                        onSlotSelect={(dateTime, time) => {
                           setFormData((prev) => ({ ...prev, startTime: dateTime }))
-                          setSelectedSlot(dateTime.split('T')[1])
+                          setSelectedSlot(time)
                         }}
                         selectedSlot={selectedSlot}
                       />

@@ -35,8 +35,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Parse date
+    // Parse date - treat as local date
     const selectedDate = new Date(date)
+    selectedDate.setHours(0, 0, 0, 0)
     const dayOfWeek = selectedDate.getDay()
 
     // Get provider's availability for this day
@@ -85,6 +86,14 @@ export async function GET(request: NextRequest) {
       const slotEnd = new Date(slotStart)
       slotEnd.setMinutes(slotEnd.getMinutes() + duration)
 
+      // Skip slots that don't meet the 30-minute advance booking requirement
+      const now = new Date()
+      const isToday = selectedDate.toDateString() === now.toDateString()
+      const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000)
+      if (isToday && slotStart < thirtyMinutesFromNow) {
+        continue
+      }
+
       const hasConflict = existingAppointments.some((apt: Record<string, unknown>) => {
         const aptStart = new Date(apt.startTime as string)
         const aptEnd = new Date(apt.endTime as string)
@@ -111,6 +120,54 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response)
   } catch (error: unknown) {
     console.error('GET /api/providers/availability error:', error)
+    const { message, statusCode } = handleError(error)
+
+    const response: ApiResponse = {
+      success: false,
+      error: message,
+    }
+
+    return NextResponse.json(response, { status: statusCode })
+  }
+}
+
+
+export async function PATCH(request: NextRequest) {
+  try {
+    await connectDB()
+    const user = await authenticate(request)
+
+    const body = await request.json()
+    const { availability } = body
+
+    if (!availability || !Array.isArray(availability)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid availability data' },
+        { status: 400 }
+      )
+    }
+
+    const providerRepo = new ProviderRepository()
+    
+    // Update provider availability
+    const updated = await providerRepo.update(user.userId, { availability })
+    
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to update availability' },
+        { status: 500 }
+      )
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      data: updated,
+      message: 'Availability updated successfully',
+    }
+
+    return NextResponse.json(response)
+  } catch (error: unknown) {
+    console.error('PATCH /api/providers/availability error:', error)
     const { message, statusCode } = handleError(error)
 
     const response: ApiResponse = {

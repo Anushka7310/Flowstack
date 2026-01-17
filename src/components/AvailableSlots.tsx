@@ -22,7 +22,7 @@ interface AvailableSlotsProps {
   providerId: string
   selectedDate: string
   duration: number
-  onSlotSelect: (dateTime: string) => void
+  onSlotSelect: (dateTime: string, time: string) => void
   selectedSlot: string | null
 }
 
@@ -94,7 +94,15 @@ export function AvailableSlots({
       const [hours, minutes] = slot.time.split(':')
       const dateTime = new Date(selectedDate)
       dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
-      onSlotSelect(dateTime.toISOString().slice(0, 16))
+      // Use datetime-local format instead of ISO to avoid timezone conversion
+      const year = dateTime.getFullYear()
+      const month = String(dateTime.getMonth() + 1).padStart(2, '0')
+      const day = String(dateTime.getDate()).padStart(2, '0')
+      const hour = String(dateTime.getHours()).padStart(2, '0')
+      const minute = String(dateTime.getMinutes()).padStart(2, '0')
+      const localDateTime = `${year}-${month}-${day}T${hour}:${minute}`
+      console.log('Selected slot:', slot.time, 'Local DateTime:', localDateTime)
+      onSlotSelect(localDateTime, slot.time)
     }
   }
 
@@ -141,6 +149,7 @@ export function AvailableSlots({
             <Grid container spacing={2}>
               {slots.map((slot, index) => {
                 const isSelected = selectedSlot === slot.time
+                console.log(`Slot ${slot.time}: selectedSlot="${selectedSlot}", isSelected=${isSelected}`)
                 return (
                   <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
                     <Button

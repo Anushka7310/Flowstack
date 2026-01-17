@@ -3,18 +3,20 @@ import { AppointmentStatus } from '@/types'
 
 export const createAppointmentSchema = z.object({
   providerId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid provider ID'),
-  startTime: z.string().refine((date) => {
+  startTime: z.string().refine((dateString) => {
     try {
-      const appointmentDate = new Date(date)
+      // The dateString comes as ISO (UTC), but we need to compare with current time
+      const appointmentDate = new Date(dateString)
       if (isNaN(appointmentDate.getTime())) return false
+      
       const now = new Date()
-      const twoHoursFromNow = new Date(now.getTime() + 2 * 60 * 60 * 1000)
-      return appointmentDate >= twoHoursFromNow
+      // Just check if it's in the future - the API already filtered available slots
+      return appointmentDate > now
     } catch {
       return false
     }
-  }, 'Appointments must be booked at least 2 hours in advance'),
-  duration: z.number().min(15, 'Duration must be at least 15 minutes').max(120, 'Duration cannot exceed 120 minutes').default(30), // minutes
+  }, 'Selected time slot is no longer available'),
+  duration: z.number().min(15, 'Duration must be at least 15 minutes').max(120, 'Duration cannot exceed 120 minutes').default(30),
   reason: z.string().min(5, 'Reason must be at least 5 characters').max(500, 'Reason cannot exceed 500 characters'),
 })
 

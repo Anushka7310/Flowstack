@@ -29,8 +29,16 @@ export async function GET(request: NextRequest) {
       endOfDay
     )
 
-    // Get unique patient IDs
-    const patientIds = [...new Set(appointments.map((apt) => (apt as Record<string, unknown>).patientId?.toString()).filter(Boolean))]
+    // Get unique patient IDs - handle both ObjectId and string formats
+    const patientIds = [...new Set(appointments.map((apt) => {
+      const record = apt as Record<string, unknown>
+      const patientId = record.patientId
+      if (typeof patientId === 'string') return patientId
+      if (patientId && typeof patientId === 'object' && '_id' in patientId) {
+        return (patientId as { _id: { toString: () => string } })._id.toString()
+      }
+      return null
+    }).filter(Boolean))] as string[]
 
     // Fetch patient details
     const patients = await Promise.all(
