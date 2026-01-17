@@ -119,20 +119,6 @@ A modern, full-stack healthcare appointment management system built with Next.js
 
 ---
 
-## 🏗 Architecture
-
-### Design Patterns
-1. **Repository Pattern**: Data access abstraction layer
-2. **Service Layer**: Business logic separation
-3. **Middleware Pattern**: Authentication and authorization
-4. **Factory Pattern**: Model creation and initialization
-
-### Folder Structure Philosophy
-- **Feature-based organization**: Related components grouped together
-- **Separation of concerns**: Clear boundaries between layers
-- **Reusability**: Shared components and utilities
-- **Type safety**: Comprehensive TypeScript interfaces
-
 ### Data Flow
 ```
 Client Request → Middleware (Auth) → API Route → Service Layer → Repository → Database
@@ -143,11 +129,6 @@ Client Response ← API Route ← Service Layer ← Repository ← Database
 ---
 
 ## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18.0.0 or higher
-- npm or yarn package manager
-- MongoDB Atlas account (or local MongoDB instance)
 
 ### Installation
 
