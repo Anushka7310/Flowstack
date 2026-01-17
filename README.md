@@ -716,26 +716,6 @@ The application includes unit tests for:
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Code Style
-
-- Follow TypeScript best practices
-- Use ESLint configuration provided
-- Write meaningful commit messages
-- Add tests for new features
-- Update documentation as needed
-
----
-
 ## 📝 License
 
 This project is licensed under the MIT License.
@@ -744,36 +724,6 @@ This project is licensed under the MIT License.
 
 ## 👥 Authors
 
-- **Your Name** - Initial work
-
----
-
-## 🙏 Acknowledgments
-
-- Material-UI for the component library
-- Next.js team for the amazing framework
-- MongoDB for the database solution
-- Vercel for hosting and deployment
-
----
-
-## 📞 Support
-
-For support, email support@healthcare-plus.com or open an issue in the repository.
-
----
-
-## 🔮 Future Enhancements
-
-- [ ] Email notifications for appointments
-- [ ] SMS reminders
-- [ ] Video consultation integration
-- [ ] Medical records management
-- [ ] Prescription management
-- [ ] Payment integration
-- [ ] Multi-language support
-- [ ] Mobile app (React Native)
-- [ ] Advanced analytics dashboard
-- [ ] Export appointments to calendar (iCal)
+- **Anushka Gupta**
 
 ---
