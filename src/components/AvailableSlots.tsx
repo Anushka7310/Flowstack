@@ -101,7 +101,6 @@ export function AvailableSlots({
       const hour = String(dateTime.getHours()).padStart(2, '0')
       const minute = String(dateTime.getMinutes()).padStart(2, '0')
       const localDateTime = `${year}-${month}-${day}T${hour}:${minute}`
-      console.log('Selected slot:', slot.time, 'Local DateTime:', localDateTime)
       onSlotSelect(localDateTime, slot.time)
     }
   }
@@ -149,7 +148,6 @@ export function AvailableSlots({
             <Grid container spacing={2}>
               {slots.map((slot, index) => {
                 const isSelected = selectedSlot === slot.time
-                console.log(`Slot ${slot.time}: selectedSlot="${selectedSlot}", isSelected=${isSelected}`)
                 return (
                   <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
                     <Button
