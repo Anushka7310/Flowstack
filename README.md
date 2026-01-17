@@ -11,20 +11,6 @@ A modern, full-stack healthcare appointment management system built with Next.js
 
 ---
 
-## 📋 Table of Contents
-
-- [Key Features](#-key-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Project Structure](#-project-structure)
-- [API Documentation](#-api-documentation)
-- [Deployment](#-deployment)
-- [Testing](#-testing)
-- [Contributing](#-contributing)
-
----
 
 ## ✨ Key Features
 
@@ -340,27 +326,6 @@ This application is deployed on Vercel with automatic CI/CD pipeline.
 
 **Live URL**: [https://flowstack-virid.vercel.app/](https://flowstack-virid.vercel.app/)
 
-#### Deployment Steps:
-
-1. **Connect Repository**
-   - Push your code to GitHub
-   - Import project in Vercel dashboard
-   - Connect your GitHub repository
-
-2. **Configure Environment Variables**
-   - Add all environment variables in Vercel dashboard
-   - Settings → Environment Variables
-   - Add variables for Production, Preview, and Development
-
-3. **Configure Build Settings**
-   - Build Command: `npm run build`
-   - Output Directory: `.next`
-   - Install Command: `npm install`
-
-4. **Deploy**
-   - Vercel automatically deploys on push to main branch
-   - Preview deployments for pull requests
-   - Production deployment on merge to main
 
 #### CI/CD Pipeline
 
@@ -389,17 +354,6 @@ vercel login
 # Deploy to production
 vercel --prod
 ```
-
-### Environment Variables for Production
-
-Ensure these are set in Vercel:
-- `MONGODB_URI`: Production MongoDB connection string
-- `JWT_SECRET`: Strong secret key for production
-- `JWT_EXPIRES_IN`: Token expiration (e.g., 7d)
-- `NEXT_PUBLIC_APP_URL`: Your production URL
-- `NODE_ENV`: production
-
----
 
 ## 🧪 Testing
 
